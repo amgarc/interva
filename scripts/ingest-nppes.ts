@@ -142,7 +142,7 @@ function rowToPhysician(row: Record<string, string>): PhysicianRecord | null {
     namePrefix: emptyToNull(row["Provider Name Prefix Text"]),
     nameSuffix: emptyToNull(row["Provider Name Suffix Text"]),
     credentials: emptyToNull(row["Provider Credential Text"]),
-    gender: emptyToNull(row["Provider Gender Code"]),
+    gender: emptyToNull(row["Provider Sex Code"]),
     soleProprietor: emptyToNull(row["Is Sole Proprietor"]),
     enumerationDate: parseNppesDate(row["Provider Enumeration Date"]),
     lastUpdatedDate: parseNppesDate(row["Last Update Date"]),
