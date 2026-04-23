@@ -1,0 +1,98 @@
+// Interva — national IR physician outreach funnel
+//
+// Milestone 1 schema: NPPES-derived canonical physician records.
+// Later milestones add: Enrichment (source-tagged facts), Outreach (funnel state),
+// OutreachEvent (append-only touches).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Canonical physician record, keyed by NPI. One row per active IR physician.
+model Physician {
+  npi              String   @id
+  entityTypeCode   String   // "1" = individual, "2" = org. Ingest filters to "1".
+  firstName        String?
+  middleName       String?
+  lastName         String?
+  namePrefix       String?
+  nameSuffix       String?
+  credentials      String?  // "MD", "DO", "MD, PhD", etc. Free-text from NPPES.
+  gender           String?  // "M", "F", or null/"U"
+
+  soleProprietor   String?  // "Y"/"N"/"X"
+  enumerationDate  DateTime?
+  lastUpdatedDate  DateTime?
+  deactivationDate DateTime?
+  deactivationReason String?
+
+  taxonomies       PhysicianTaxonomy[]
+  addresses        PhysicianAddress[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([lastName, firstName])
+  @@index([deactivationDate])
+}
+
+// --- Taxonomies (1..15 per physician in NPPES). Relational so we can filter
+//     "all physicians with taxonomy X" efficiently.
+model PhysicianTaxonomy {
+  id           Int       @id @default(autoincrement())
+  npi          String
+  physician    Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  code         String    // e.g. "2085R0204X"
+  name         String?   // e.g. "Vascular & Interventional Radiology"
+  license      String?
+  licenseState String?
+  isPrimary    Boolean   @default(false)
+  slot         Int       // 1..15, from NPPES column position
+
+  @@unique([npi, slot])
+  @@index([code])
+}
+
+// --- Addresses. NPPES includes mailing + practice location per provider;
+//     later enrichment may add additional practice sites.
+model PhysicianAddress {
+  id         Int       @id @default(autoincrement())
+  npi        String
+  physician  Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  kind       String    // "mailing" | "practice"
+  line1      String?
+  line2      String?
+  city       String?
+  state      String?
+  postalCode String?
+  country    String?   @default("US")
+  phone      String?
+  fax        String?
+
+  @@index([npi, kind])
+  @@index([state, city])
+}
+
+// --- Audit log for each bulk ingest run. Lets us see when data was last refreshed
+//     and detect silent failures.
+model IngestRun {
+  id            Int       @id @default(autoincrement())
+  source        String    // "NPPES"
+  filename      String?
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+  status        String    // "running" | "completed" | "failed"
+  rowsRead      Int       @default(0)
+  rowsMatched   Int       @default(0)
+  rowsUpserted  Int       @default(0)
+  error         String?
+
+  @@index([source, startedAt])
+}

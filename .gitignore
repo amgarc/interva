@@ -1,0 +1,27 @@
+# deps
+node_modules/
+
+# next
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# env
+.env
+.env.local
+.env.*.local
+
+# NPPES bulk files — keep out of git (multi-GB)
+data/nppes/
+*.csv
+*.zip
+
+# prisma
+prisma/migrations/dev.db*
+
+# misc
+.DS_Store
+*.log
+.vscode/
+.idea/
