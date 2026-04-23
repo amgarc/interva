@@ -25,3 +25,6 @@ prisma/migrations/dev.db*
 *.log
 .vscode/
 .idea/
+
+# Claude Code session state (user-local)
+.claude/
