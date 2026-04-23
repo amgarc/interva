@@ -1,0 +1,60 @@
+import { IR_TAXONOMY_CODES } from "./taxonomies";
+
+// Next.js searchParams give us string | string[] | undefined per key.
+type Raw = Record<string, string | string[] | undefined>;
+
+function first(raw: string | string[] | undefined): string | undefined {
+  if (Array.isArray(raw)) return raw[0];
+  return raw;
+}
+
+function many(raw: string | string[] | undefined): string[] {
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") return [raw];
+  return [];
+}
+
+export interface ParsedFilters {
+  q: string;
+  state: string;
+  taxonomyCodes: string[];
+  primaryOnly: boolean;
+  includeDeactivated: boolean;
+  page: number;
+}
+
+export function parseFilters(raw: Raw): ParsedFilters {
+  const validTax = new Set(IR_TAXONOMY_CODES as readonly string[]);
+  return {
+    q: first(raw.q)?.trim() ?? "",
+    state: first(raw.state)?.trim().toUpperCase() ?? "",
+    taxonomyCodes: many(raw.tax).filter((c) => validTax.has(c)),
+    primaryOnly: first(raw.primary) === "1",
+    includeDeactivated: first(raw.inactive) === "1",
+    page: Math.max(1, parseInt(first(raw.page) ?? "1", 10) || 1),
+  };
+}
+
+// Build a URL query string preserving current filters but overriding page.
+export function buildPageHref(filters: ParsedFilters, page: number): string {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.state) params.set("state", filters.state);
+  for (const code of filters.taxonomyCodes) params.append("tax", code);
+  if (filters.primaryOnly) params.set("primary", "1");
+  if (filters.includeDeactivated) params.set("inactive", "1");
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return qs ? `/?${qs}` : "/";
+}
+
+export function buildExportHref(filters: ParsedFilters): string {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.state) params.set("state", filters.state);
+  for (const code of filters.taxonomyCodes) params.append("tax", code);
+  if (filters.primaryOnly) params.set("primary", "1");
+  if (filters.includeDeactivated) params.set("inactive", "1");
+  const qs = params.toString();
+  return qs ? `/api/export?${qs}` : "/api/export";
+}
