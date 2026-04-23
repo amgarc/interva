@@ -35,11 +35,18 @@ export default async function PhysicianDetailPage({
           {fullName}
           {p.credentials && <span className="opacity-60 font-normal">, {p.credentials}</span>}
         </h1>
-        {p.deactivationDate && (
-          <span className="text-xs px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-300">
-            deactivated {p.deactivationDate.toISOString().slice(0, 10)}
-          </span>
-        )}
+        <div className="flex gap-2">
+          {p.isActiveIr && (
+            <span className="text-xs px-2 py-1 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              active IR
+            </span>
+          )}
+          {p.deactivationDate && (
+            <span className="text-xs px-2 py-1 rounded bg-red-500/15 text-red-700 dark:text-red-300">
+              deactivated {p.deactivationDate.toISOString().slice(0, 10)}
+            </span>
+          )}
+        </div>
       </div>
 
       <dl className="mt-4 grid grid-cols-[160px_1fr] gap-y-1 text-sm">
@@ -54,6 +61,48 @@ export default async function PhysicianDetailPage({
         <dt className="opacity-60">Sole proprietor</dt>
         <dd>{p.soleProprietor ?? "—"}</dd>
       </dl>
+
+      {p.lastIrBillingYear != null && (
+        <Section title={`Medicare IR activity (${p.lastIrBillingYear})`}>
+          <div className="grid grid-cols-[160px_1fr] gap-y-1 text-sm mb-3">
+            <dt className="opacity-60">Total services</dt>
+            <dd>
+              {p.totalIrServices?.toLocaleString() ?? "—"}{" "}
+              <span className="opacity-60 text-xs">
+                ({p.totalIrBenes?.toLocaleString() ?? "—"} beneficiaries)
+              </span>
+            </dd>
+            <dt className="opacity-60">Distinct IR CPTs</dt>
+            <dd>{p.distinctIrCpts ?? "—"}</dd>
+            <dt className="opacity-60">Subspecialty mix</dt>
+            <dd>{p.activeIrCategories.length > 0 ? p.activeIrCategories.join(" · ") : "—"}</dd>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="text-left opacity-70">
+              <tr>
+                <th className="py-1 pr-3">CPT</th>
+                <th className="py-1 pr-3">Category</th>
+                <th className="py-1 pr-3">POS</th>
+                <th className="py-1 pr-3 text-right">Services</th>
+                <th className="py-1 text-right">Beneficiaries</th>
+              </tr>
+            </thead>
+            <tbody>
+              {p.procedures.map((pv) => (
+                <tr key={pv.id} className="border-t border-black/5 dark:border-white/5">
+                  <td className="py-1 pr-3 font-mono text-xs">{pv.cpt}</td>
+                  <td className="py-1 pr-3 text-xs">{pv.category}</td>
+                  <td className="py-1 pr-3 text-xs">{pv.placeOfService ?? "—"}</td>
+                  <td className="py-1 pr-3 text-right tabular-nums">{pv.totServices.toLocaleString()}</td>
+                  <td className="py-1 text-right tabular-nums">
+                    {pv.totBenes != null ? pv.totBenes.toLocaleString() : <span className="opacity-50">sup.</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Section>
+      )}
 
       <Section title="Taxonomies">
         <table className="w-full text-sm">

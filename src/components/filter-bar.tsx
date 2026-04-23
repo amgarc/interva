@@ -7,6 +7,8 @@ interface FilterBarProps {
   taxonomyCodes: string[];
   primaryOnly: boolean;
   includeDeactivated: boolean;
+  activeIrOnly: boolean;
+  sortBy: "lastName" | "enumerationDate" | "irVolume";
   states: string[];
   total: number;
 }
@@ -17,11 +19,19 @@ export function FilterBar({
   taxonomyCodes,
   primaryOnly,
   includeDeactivated,
+  activeIrOnly,
+  sortBy,
   states,
   total,
 }: FilterBarProps) {
   const hasFilters =
-    q || state || taxonomyCodes.length > 0 || primaryOnly || includeDeactivated;
+    q ||
+    state ||
+    taxonomyCodes.length > 0 ||
+    primaryOnly ||
+    includeDeactivated ||
+    activeIrOnly ||
+    sortBy !== "lastName";
 
   return (
     <form
@@ -81,11 +91,34 @@ export function FilterBar({
         <label className="flex items-center gap-1.5 text-sm py-1.5">
           <input
             type="checkbox"
+            name="active"
+            value="1"
+            defaultChecked={activeIrOnly}
+          />
+          <span title="Billed ≥25 IR Medicare services in 2023">Active IR only</span>
+        </label>
+
+        <label className="flex items-center gap-1.5 text-sm py-1.5">
+          <input
+            type="checkbox"
             name="inactive"
             value="1"
             defaultChecked={includeDeactivated}
           />
           <span>Include deactivated</span>
+        </label>
+
+        <label className="flex flex-col text-sm">
+          <span className="opacity-70 mb-1">Sort by</span>
+          <select
+            name="sort"
+            defaultValue={sortBy}
+            className="border border-black/15 dark:border-white/15 rounded px-3 py-1.5 bg-transparent min-w-[140px]"
+          >
+            <option value="lastName">Name (A–Z)</option>
+            <option value="irVolume">IR volume (high→low)</option>
+            <option value="enumerationDate">Career length</option>
+          </select>
         </label>
 
         <button

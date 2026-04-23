@@ -24,6 +24,8 @@ export default async function Home({
       taxonomyCodes: filters.taxonomyCodes,
       primaryOnly: filters.primaryOnly,
       includeDeactivated: filters.includeDeactivated,
+      activeIrOnly: filters.activeIrOnly,
+      sortBy: filters.sortBy,
       page: filters.page,
     }),
     listPracticeStates(),
@@ -47,6 +49,8 @@ export default async function Home({
         taxonomyCodes={filters.taxonomyCodes}
         primaryOnly={filters.primaryOnly}
         includeDeactivated={filters.includeDeactivated}
+        activeIrOnly={filters.activeIrOnly}
+        sortBy={filters.sortBy}
         states={states}
         total={total}
       />

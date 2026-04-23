@@ -7,9 +7,10 @@ export interface PhysicianFilters {
   taxonomyCodes?: string[];
   primaryOnly?: boolean;
   includeDeactivated?: boolean;
+  activeIrOnly?: boolean;
   page?: number;
   perPage?: number;
-  sortBy?: "lastName" | "enumerationDate" | "state";
+  sortBy?: "lastName" | "enumerationDate" | "state" | "irVolume";
   sortDir?: "asc" | "desc";
 }
 
@@ -44,6 +45,10 @@ function buildWhere(filters: PhysicianFilters): Prisma.PhysicianWhereInput {
     });
   }
 
+  if (filters.activeIrOnly) {
+    and.push({ isActiveIr: true });
+  }
+
   if (filters.taxonomyCodes && filters.taxonomyCodes.length > 0) {
     and.push({
       taxonomies: {
@@ -65,9 +70,9 @@ function buildOrderBy(
   switch (filters.sortBy) {
     case "enumerationDate":
       return [{ enumerationDate: dir }, { lastName: "asc" }];
+    case "irVolume":
+      return [{ totalIrServices: { sort: dir, nulls: "last" } }, { lastName: "asc" }];
     case "state":
-      // Sort by state requires joining; approximate by name for now and let
-      // the UI filter/sort by state explicitly when needed.
       return [{ lastName: "asc" }, { firstName: "asc" }];
     case "lastName":
     default:
@@ -103,6 +108,7 @@ export async function getPhysicianByNpi(npi: string) {
     include: {
       taxonomies: { orderBy: { slot: "asc" } },
       addresses: true,
+      procedures: { orderBy: [{ year: "desc" }, { totServices: "desc" }] },
     },
   });
 }

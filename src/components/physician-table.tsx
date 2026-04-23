@@ -6,6 +6,9 @@ type PhysicianWithRelations = Physician & {
   addresses: PhysicianAddress[];
 };
 
+// Note: Physician already carries isActiveIr / totalIrServices / distinctIrCpts
+// / lastIrBillingYear after the active-IR derivation, so no extra include needed.
+
 export function PhysicianTable({ rows }: { rows: PhysicianWithRelations[] }) {
   if (rows.length === 0) {
     return (
@@ -25,7 +28,7 @@ export function PhysicianTable({ rows }: { rows: PhysicianWithRelations[] }) {
             <th className="px-3 py-2 font-medium">Primary taxonomy</th>
             <th className="px-3 py-2 font-medium">Practice location</th>
             <th className="px-3 py-2 font-medium">Phone</th>
-            <th className="px-3 py-2 font-medium">Enumerated</th>
+            <th className="px-3 py-2 font-medium text-right" title="Total IR Tier-1 services billed to Medicare in 2023">IR svcs</th>
           </tr>
         </thead>
         <tbody>
@@ -49,6 +52,14 @@ export function PhysicianTable({ rows }: { rows: PhysicianWithRelations[] }) {
                     {name}
                     <span className="opacity-60">{credentials}</span>
                   </Link>
+                  {p.isActiveIr && (
+                    <span
+                      className="ml-2 text-xs px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                      title={`Billed ${p.totalIrServices?.toLocaleString() ?? 0} IR Tier-1 services in ${p.lastIrBillingYear}`}
+                    >
+                      active IR
+                    </span>
+                  )}
                   {p.deactivationDate && (
                     <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-red-500/15 text-red-700 dark:text-red-300">
                       deactivated
@@ -75,8 +86,12 @@ export function PhysicianTable({ rows }: { rows: PhysicianWithRelations[] }) {
                 <td className="px-3 py-2 text-xs font-mono">
                   {practice?.phone ? formatPhone(practice.phone) : <span className="opacity-40">—</span>}
                 </td>
-                <td className="px-3 py-2 text-xs opacity-80">
-                  {p.enumerationDate?.toISOString().slice(0, 10) ?? "—"}
+                <td className="px-3 py-2 text-xs text-right tabular-nums">
+                  {p.totalIrServices != null ? (
+                    <span title={`${p.distinctIrCpts} distinct CPTs`}>{p.totalIrServices.toLocaleString()}</span>
+                  ) : (
+                    <span className="opacity-40">—</span>
+                  )}
                 </td>
               </tr>
             );

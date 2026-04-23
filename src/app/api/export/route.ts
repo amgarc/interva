@@ -17,6 +17,12 @@ const CSV_COLUMNS = [
   "Primary Taxonomy License",
   "Primary Taxonomy License State",
   "All Taxonomy Codes",
+  "Active IR",
+  "Total IR Services",
+  "Total IR Beneficiaries",
+  "Distinct IR CPTs",
+  "Active IR Categories",
+  "Last IR Billing Year",
   "Practice Address 1",
   "Practice Address 2",
   "Practice City",
@@ -77,6 +83,9 @@ export async function GET(req: NextRequest) {
       addresses: { some: { kind: "practice", state: filters.state } },
     });
   }
+  if (filters.activeIrOnly) {
+    and.push({ isActiveIr: true });
+  }
   if (filters.taxonomyCodes.length > 0) {
     and.push({
       taxonomies: {
@@ -120,6 +129,12 @@ export async function GET(req: NextRequest) {
         primary?.license,
         primary?.licenseState,
         allCodes,
+        p.isActiveIr ? "Y" : "N",
+        p.totalIrServices,
+        p.totalIrBenes,
+        p.distinctIrCpts,
+        p.activeIrCategories.join("; "),
+        p.lastIrBillingYear,
         practice?.line1,
         practice?.line2,
         practice?.city,

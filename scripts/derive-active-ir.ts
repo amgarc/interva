@@ -9,7 +9,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const DEFAULT_THRESHOLD = 10;
+const DEFAULT_THRESHOLD = 25;
 
 async function main(): Promise<void> {
   const threshold = parseInt(process.argv[2] ?? String(DEFAULT_THRESHOLD), 10);
