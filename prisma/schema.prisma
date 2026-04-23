@@ -31,14 +31,26 @@ model Physician {
   deactivationDate DateTime?
   deactivationReason String?
 
+  // Derived Medicare PUF signal (backfilled by scripts/derive-active-ir.ts).
+  // All nullable until the PUF ingest + derivation has run.
+  lastIrBillingYear   Int?
+  totalIrServices     Int?     // sum of Tot_Srvcs across all IR Tier-1 CPTs
+  totalIrBenes        Int?     // sum of Tot_Benes (suppressed rows counted as 0)
+  distinctIrCpts      Int?     // count of distinct IR Tier-1 CPT codes billed
+  activeIrCategories  String[] @default([])  // ["VASCULAR", "EMBOLIZATION", ...]
+  isActiveIr          Boolean  @default(false)
+
   taxonomies       PhysicianTaxonomy[]
   addresses        PhysicianAddress[]
+  procedures       ProcedureVolume[]
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([lastName, firstName])
   @@index([deactivationDate])
+  @@index([isActiveIr])
+  @@index([lastIrBillingYear])
 }
 
 // --- Taxonomies (1..15 per physician in NPPES). Relational so we can filter
@@ -80,11 +92,38 @@ model PhysicianAddress {
   @@index([state, city])
 }
 
+// --- Per-NPI, per-HCPCS, per-year procedure volume from Medicare Physician &
+//     Other Practitioners (PUF). We only load rows where HCPCS is in our IR
+//     Tier-1 code set, so not every physician has rows and not every CPT.
+model ProcedureVolume {
+  id               Int       @id @default(autoincrement())
+  npi              String
+  physician        Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  year             Int       // claim year, e.g. 2023
+  cpt              String    // HCPCS_Cd, e.g. "37221"
+  category         String    // IR category: VASCULAR, EMBOLIZATION, etc.
+  placeOfService   String?   // "F" (facility) | "O" (office) | null (unknown)
+
+  totServices      Int       // Tot_Srvcs
+  totBenes         Int?      // Tot_Benes, null if CMS suppressed (<11)
+  totBeneDaySrvcs  Int?      // Tot_Bene_Day_Srvcs
+  avgMdcrAllowed   Float?    // Avg_Mdcr_Alowd_Amt
+  avgMdcrPayment   Float?    // Avg_Mdcr_Pymt_Amt
+
+  createdAt        DateTime  @default(now())
+
+  @@unique([npi, year, cpt, placeOfService])
+  @@index([npi, year])
+  @@index([cpt, year])
+  @@index([category, year])
+}
+
 // --- Audit log for each bulk ingest run. Lets us see when data was last refreshed
 //     and detect silent failures.
 model IngestRun {
   id            Int       @id @default(autoincrement())
-  source        String    // "NPPES"
+  source        String    // "NPPES" | "MEDICARE_PUF" | "CARE_COMPARE" | "OPEN_PAYMENTS"
   filename      String?
   startedAt     DateTime  @default(now())
   finishedAt    DateTime?

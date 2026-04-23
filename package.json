@@ -11,7 +11,9 @@
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
-    "ingest:nppes": "tsx scripts/ingest-nppes.ts"
+    "ingest:nppes": "tsx scripts/ingest-nppes.ts",
+    "ingest:puf": "tsx scripts/ingest-medicare-puf.ts",
+    "derive:active-ir": "tsx scripts/derive-active-ir.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

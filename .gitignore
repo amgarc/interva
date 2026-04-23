@@ -12,8 +12,8 @@ tsconfig.tsbuildinfo
 .env.local
 .env.*.local
 
-# NPPES bulk files — keep out of git (multi-GB)
-data/nppes/
+# Bulk data files — keep out of git (multi-GB)
+data/
 *.csv
 *.zip
 
