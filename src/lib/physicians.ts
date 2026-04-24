@@ -4,10 +4,12 @@ import { prisma } from "./db";
 export interface PhysicianFilters {
   q?: string;
   state?: string;
+  cbsaCode?: string;
   taxonomyCodes?: string[];
   primaryOnly?: boolean;
   includeDeactivated?: boolean;
   activeIrOnly?: boolean;
+  practiceSetting?: string; // "OBL" | "FACILITY" | "MIXED"
   page?: number;
   perPage?: number;
   sortBy?: "lastName" | "enumerationDate" | "state" | "irVolume";
@@ -43,6 +45,18 @@ function buildWhere(filters: PhysicianFilters): Prisma.PhysicianWhereInput {
         some: { kind: "practice", state: filters.state.toUpperCase() },
       },
     });
+  }
+
+  if (filters.cbsaCode) {
+    and.push({
+      addresses: {
+        some: { kind: "practice", cbsaCode: filters.cbsaCode },
+      },
+    });
+  }
+
+  if (filters.practiceSetting) {
+    and.push({ practiceSetting: filters.practiceSetting });
   }
 
   if (filters.activeIrOnly) {
@@ -124,4 +138,31 @@ export async function listPracticeStates(): Promise<string[]> {
     .map((r) => r.state as string)
     .filter((s) => s.length === 2)
     .sort();
+}
+
+export interface MetroOption {
+  code: string;
+  name: string;
+  practiceCount: number;
+}
+
+// Return CBSAs that have ≥1 IR physician practicing there, sorted by count.
+export async function listPracticeMetros(state?: string): Promise<MetroOption[]> {
+  const grouped = await prisma.physicianAddress.groupBy({
+    by: ["cbsaCode", "cbsaName"],
+    where: {
+      kind: "practice",
+      cbsaCode: { not: null },
+      ...(state && { state: state.toUpperCase() }),
+    },
+    _count: { npi: true },
+    orderBy: { _count: { npi: "desc" } },
+  });
+  return grouped
+    .filter((g) => g.cbsaCode && g.cbsaName)
+    .map((g) => ({
+      code: g.cbsaCode as string,
+      name: g.cbsaName as string,
+      practiceCount: g._count.npi,
+    }));
 }

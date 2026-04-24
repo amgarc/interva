@@ -1,36 +1,45 @@
 import Link from "next/link";
 import { IR_TAXONOMIES, IR_TAXONOMY_CODES } from "@/lib/taxonomies";
+import type { MetroOption } from "@/lib/physicians";
 
 interface FilterBarProps {
   q: string;
   state: string;
+  cbsaCode: string;
   taxonomyCodes: string[];
   primaryOnly: boolean;
   includeDeactivated: boolean;
   activeIrOnly: boolean;
+  practiceSetting: string;
   sortBy: "lastName" | "enumerationDate" | "irVolume";
   states: string[];
+  metros: MetroOption[];
   total: number;
 }
 
 export function FilterBar({
   q,
   state,
+  cbsaCode,
   taxonomyCodes,
   primaryOnly,
   includeDeactivated,
   activeIrOnly,
+  practiceSetting,
   sortBy,
   states,
+  metros,
   total,
 }: FilterBarProps) {
   const hasFilters =
     q ||
     state ||
+    cbsaCode ||
     taxonomyCodes.length > 0 ||
     primaryOnly ||
     includeDeactivated ||
     activeIrOnly ||
+    practiceSetting ||
     sortBy !== "lastName";
 
   return (
@@ -63,6 +72,38 @@ export function FilterBar({
                 {s}
               </option>
             ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col text-sm min-w-[260px]">
+          <span className="opacity-70 mb-1">Metro (CBSA)</span>
+          <select
+            name="cbsa"
+            defaultValue={cbsaCode}
+            className="border border-black/15 dark:border-white/15 rounded px-3 py-1.5 bg-transparent"
+          >
+            <option value="">All</option>
+            {metros.slice(0, 100).map((m) => (
+              <option key={m.code} value={m.code}>
+                {m.name} ({m.practiceCount})
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="flex flex-col text-sm">
+          <span className="opacity-70 mb-1" title="Derived from Medicare PUF place-of-service mix">
+            Practice setting
+          </span>
+          <select
+            name="setting"
+            defaultValue={practiceSetting}
+            className="border border-black/15 dark:border-white/15 rounded px-3 py-1.5 bg-transparent min-w-[130px]"
+          >
+            <option value="">All</option>
+            <option value="OBL">OBL (office)</option>
+            <option value="FACILITY">Facility (hosp/ASC)</option>
+            <option value="MIXED">Mixed</option>
           </select>
         </label>
 

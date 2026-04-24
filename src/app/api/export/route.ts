@@ -23,11 +23,14 @@ const CSV_COLUMNS = [
   "Distinct IR CPTs",
   "Active IR Categories",
   "Last IR Billing Year",
+  "Practice Setting",
   "Practice Address 1",
   "Practice Address 2",
   "Practice City",
   "Practice State",
   "Practice ZIP",
+  "Practice Metro (CBSA)",
+  "Practice Metro Code",
   "Practice Phone",
   "Practice Fax",
   "Mailing Address 1",
@@ -86,6 +89,14 @@ export async function GET(req: NextRequest) {
   if (filters.activeIrOnly) {
     and.push({ isActiveIr: true });
   }
+  if (filters.cbsaCode) {
+    and.push({
+      addresses: { some: { kind: "practice", cbsaCode: filters.cbsaCode } },
+    });
+  }
+  if (filters.practiceSetting) {
+    and.push({ practiceSetting: filters.practiceSetting });
+  }
   if (filters.taxonomyCodes.length > 0) {
     and.push({
       taxonomies: {
@@ -135,11 +146,14 @@ export async function GET(req: NextRequest) {
         p.distinctIrCpts,
         p.activeIrCategories.join("; "),
         p.lastIrBillingYear,
+        p.practiceSetting,
         practice?.line1,
         practice?.line2,
         practice?.city,
         practice?.state,
         practice?.postalCode,
+        practice?.cbsaName,
+        practice?.cbsaCode,
         practice?.phone,
         practice?.fax,
         mailing?.line1,

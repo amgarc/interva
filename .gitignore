@@ -14,8 +14,10 @@ tsconfig.tsbuildinfo
 
 # Bulk data files — keep out of git (multi-GB)
 data/
-*.csv
 *.zip
+# CSVs everywhere, EXCEPT small committed reference tables in reference/
+*.csv
+!reference/**/*.csv
 
 # prisma
 prisma/migrations/dev.db*

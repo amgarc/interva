@@ -35,10 +35,28 @@ export default async function PhysicianDetailPage({
           {fullName}
           {p.credentials && <span className="opacity-60 font-normal">, {p.credentials}</span>}
         </h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           {p.isActiveIr && (
             <span className="text-xs px-2 py-1 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
               active IR
+            </span>
+          )}
+          {p.practiceSetting === "OBL" && (
+            <span
+              className="text-xs px-2 py-1 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300"
+              title="Majority of IR services billed as office-based (POS=O)"
+            >
+              OBL
+            </span>
+          )}
+          {p.practiceSetting === "FACILITY" && (
+            <span className="text-xs px-2 py-1 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300">
+              facility
+            </span>
+          )}
+          {p.practiceSetting === "MIXED" && (
+            <span className="text-xs px-2 py-1 rounded bg-slate-500/15 text-slate-700 dark:text-slate-300">
+              mixed setting
             </span>
           )}
           {p.deactivationDate && (
@@ -76,6 +94,15 @@ export default async function PhysicianDetailPage({
             <dd>{p.distinctIrCpts ?? "—"}</dd>
             <dt className="opacity-60">Subspecialty mix</dt>
             <dd>{p.activeIrCategories.length > 0 ? p.activeIrCategories.join(" · ") : "—"}</dd>
+            <dt className="opacity-60">Practice setting</dt>
+            <dd>
+              {p.practiceSetting ?? "—"}
+              {p.irOfficeServices != null && p.irFacilityServices != null && (
+                <span className="opacity-60 text-xs ml-2">
+                  ({p.irOfficeServices.toLocaleString()} office / {p.irFacilityServices.toLocaleString()} facility)
+                </span>
+              )}
+            </dd>
           </div>
           <table className="w-full text-sm">
             <thead className="text-left opacity-70">
@@ -144,6 +171,12 @@ export default async function PhysicianDetailPage({
               <div>
                 {[a.city, a.state].filter(Boolean).join(", ")} {a.postalCode}
               </div>
+              {a.cbsaName && (
+                <div className="text-xs opacity-70 mt-1">
+                  Metro: {a.cbsaName}
+                  {a.cbsaType === "MICRO" && <span className="opacity-60"> (µSA)</span>}
+                </div>
+              )}
               {a.phone && (
                 <div className="mt-2 text-sm">
                   <span className="opacity-60">Phone:</span>{" "}

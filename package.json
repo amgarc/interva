@@ -13,7 +13,9 @@
     "db:studio": "prisma studio",
     "ingest:nppes": "tsx scripts/ingest-nppes.ts",
     "ingest:puf": "tsx scripts/ingest-medicare-puf.ts",
-    "derive:active-ir": "tsx scripts/derive-active-ir.ts"
+    "derive:active-ir": "tsx scripts/derive-active-ir.ts",
+    "derive:practice-setting": "tsx scripts/derive-practice-setting.ts",
+    "backfill:metros": "tsx scripts/backfill-metros.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",

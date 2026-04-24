@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FilterBar } from "@/components/filter-bar";
 import { PhysicianTable } from "@/components/physician-table";
 import { Pagination } from "@/components/pagination";
-import { listPhysicians, listPracticeStates } from "@/lib/physicians";
+import { listPhysicians, listPracticeMetros, listPracticeStates } from "@/lib/physicians";
 import { buildExportHref, buildPageHref, parseFilters } from "@/lib/search-params";
 
 export const dynamic = "force-dynamic";
@@ -17,18 +17,21 @@ export default async function Home({
   const raw = await searchParams;
   const filters = parseFilters(raw);
 
-  const [{ rows, total, page, perPage, pageCount }, states] = await Promise.all([
+  const [{ rows, total, page, perPage, pageCount }, states, metros] = await Promise.all([
     listPhysicians({
       q: filters.q,
       state: filters.state,
+      cbsaCode: filters.cbsaCode,
       taxonomyCodes: filters.taxonomyCodes,
       primaryOnly: filters.primaryOnly,
       includeDeactivated: filters.includeDeactivated,
       activeIrOnly: filters.activeIrOnly,
+      practiceSetting: filters.practiceSetting,
       sortBy: filters.sortBy,
       page: filters.page,
     }),
     listPracticeStates(),
+    listPracticeMetros(filters.state || undefined),
   ]);
 
   return (
@@ -46,12 +49,15 @@ export default async function Home({
       <FilterBar
         q={filters.q}
         state={filters.state}
+        cbsaCode={filters.cbsaCode}
         taxonomyCodes={filters.taxonomyCodes}
         primaryOnly={filters.primaryOnly}
         includeDeactivated={filters.includeDeactivated}
         activeIrOnly={filters.activeIrOnly}
+        practiceSetting={filters.practiceSetting}
         sortBy={filters.sortBy}
         states={states}
+        metros={metros}
         total={total}
       />
 
