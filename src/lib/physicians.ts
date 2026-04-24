@@ -10,6 +10,9 @@ export interface PhysicianFilters {
   includeDeactivated?: boolean;
   activeIrOnly?: boolean;
   practiceSetting?: string; // "OBL" | "FACILITY" | "MIXED"
+  ascAffiliated?: boolean;
+  hospitalAffiliated?: boolean;
+  oblOrAsc?: boolean; // convenience: OBL setting OR ASC-affiliated
   page?: number;
   perPage?: number;
   sortBy?: "lastName" | "enumerationDate" | "state" | "irVolume";
@@ -57,6 +60,20 @@ function buildWhere(filters: PhysicianFilters): Prisma.PhysicianWhereInput {
 
   if (filters.practiceSetting) {
     and.push({ practiceSetting: filters.practiceSetting });
+  }
+
+  if (filters.ascAffiliated) {
+    and.push({ hasAscAffiliation: true });
+  }
+
+  if (filters.hospitalAffiliated) {
+    and.push({ hasHospitalAffiliation: true });
+  }
+
+  if (filters.oblOrAsc) {
+    and.push({
+      OR: [{ practiceSetting: "OBL" }, { hasAscAffiliation: true }],
+    });
   }
 
   if (filters.activeIrOnly) {
@@ -123,6 +140,10 @@ export async function getPhysicianByNpi(npi: string) {
       taxonomies: { orderBy: { slot: "asc" } },
       addresses: true,
       procedures: { orderBy: [{ year: "desc" }, { totServices: "desc" }] },
+      affiliations: {
+        include: { facility: true },
+        orderBy: [{ facility: { kind: "asc" } }, { facility: { name: "asc" } }],
+      },
     },
   });
 }

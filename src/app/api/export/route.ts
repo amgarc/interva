@@ -24,6 +24,8 @@ const CSV_COLUMNS = [
   "Active IR Categories",
   "Last IR Billing Year",
   "Practice Setting",
+  "Hospital Affiliated",
+  "ASC Affiliated (inferred)",
   "Practice Address 1",
   "Practice Address 2",
   "Practice City",
@@ -97,6 +99,11 @@ export async function GET(req: NextRequest) {
   if (filters.practiceSetting) {
     and.push({ practiceSetting: filters.practiceSetting });
   }
+  if (filters.ascAffiliated) and.push({ hasAscAffiliation: true });
+  if (filters.hospitalAffiliated) and.push({ hasHospitalAffiliation: true });
+  if (filters.oblOrAsc) {
+    and.push({ OR: [{ practiceSetting: "OBL" }, { hasAscAffiliation: true }] });
+  }
   if (filters.taxonomyCodes.length > 0) {
     and.push({
       taxonomies: {
@@ -147,6 +154,8 @@ export async function GET(req: NextRequest) {
         p.activeIrCategories.join("; "),
         p.lastIrBillingYear,
         p.practiceSetting,
+        p.hasHospitalAffiliation ? "Y" : "N",
+        p.hasAscAffiliation ? "Y" : "N",
         practice?.line1,
         practice?.line2,
         practice?.city,

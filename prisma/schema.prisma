@@ -47,9 +47,15 @@ model Physician {
   // "OBL" = >75% office  |  "FACILITY" = >75% facility  |  "MIXED" | null
   practiceSetting     String?
 
+  // Derived from PhysicianAffiliation + Facility.kind. Backfilled by
+  // scripts/derive-practice-setting.ts after affiliations ingest.
+  hasHospitalAffiliation Boolean @default(false)
+  hasAscAffiliation      Boolean @default(false)
+
   taxonomies       PhysicianTaxonomy[]
   addresses        PhysicianAddress[]
   procedures       ProcedureVolume[]
+  affiliations     PhysicianAffiliation[]
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -104,6 +110,57 @@ model PhysicianAddress {
   @@index([npi, kind])
   @@index([state, city])
   @@index([cbsaCode])
+}
+
+// --- CMS-tracked facility (hospital, ASC, etc.) keyed by CCN.
+//     Populated by scripts/ingest-facilities.ts from Hospital General
+//     Information (CMS) and the ASC list (from POS Files or ASC Quality).
+model Facility {
+  ccn        String  @id       // 6-char CMS Certification Number
+  name       String
+  kind       String             // "HOSPITAL" | "ASC" | "LTCH" | "IRF" | "SNF" | "HOME_HEALTH" | "HOSPICE" | "DIALYSIS" | "OTHER"
+  address1   String?
+  city       String?
+  state      String?
+  postalCode String?
+  ownership  String?            // e.g., "Voluntary non-profit - Private"
+  hospitalType String?          // only for kind="HOSPITAL": "Acute Care" | "Critical Access" | ...
+
+  affiliations PhysicianAffiliation[]
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([kind])
+  @@index([state, city])
+}
+
+// --- Many-to-many between Physician and Facility. Sourced from CMS
+//     "Facility Affiliation" file (Doctors and Clinicians dataset) plus
+//     cross-reference to ASC CCNs from POS Files.
+model PhysicianAffiliation {
+  id        Int      @id @default(autoincrement())
+  npi       String
+  physician Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+  ccn       String
+  facility  Facility  @relation(fields: [ccn], references: [ccn], onDelete: Cascade)
+
+  // Provenance:
+  //   "CMS_FACILITY_AFFILIATION" — direct from CMS Doctors/Clinicians
+  //     Facility_Affiliation.csv (high confidence, self-reported).
+  //     Only hospitals + post-acute care facilities (LTCH/IRF/SNF/HH/Hospice/Dialysis).
+  //   "INFERRED_ZIP_CITY" — inferred from matching physician practice address
+  //     to an ASC's city + ZIP (ASCs aren't in the CMS affiliation file).
+  source    String
+
+  indPacId  String?   // Ind_PAC_ID from CMS source
+  parentCcn String?   // if facility rolls up to a parent
+
+  createdAt DateTime @default(now())
+
+  @@unique([npi, ccn])
+  @@index([ccn])
+  @@index([source])
 }
 
 // --- Lookup table: ZIP5 → CBSA. Populated by scripts/backfill-metros.ts

@@ -49,6 +49,14 @@ export default async function PhysicianDetailPage({
               OBL
             </span>
           )}
+          {p.hasAscAffiliation && (
+            <span
+              className="text-xs px-2 py-1 rounded bg-amber-500/15 text-amber-700 dark:text-amber-300"
+              title="Practice ZIP/city matches a Medicare-certified ASC"
+            >
+              ASC
+            </span>
+          )}
           {p.practiceSetting === "FACILITY" && (
             <span className="text-xs px-2 py-1 rounded bg-sky-500/15 text-sky-700 dark:text-sky-300">
               facility
@@ -157,6 +165,54 @@ export default async function PhysicianDetailPage({
           </tbody>
         </table>
       </Section>
+
+      {p.affiliations.length > 0 && (
+        <Section title={`Facility affiliations (${p.affiliations.length})`}>
+          <table className="w-full text-sm">
+            <thead className="text-left opacity-70">
+              <tr>
+                <th className="py-1 pr-3">Type</th>
+                <th className="py-1 pr-3">Name</th>
+                <th className="py-1 pr-3">Location</th>
+                <th className="py-1 pr-3">CCN</th>
+                <th className="py-1">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {p.affiliations.map((a) => {
+                const kind = a.facility.kind;
+                const kindColor =
+                  kind === "HOSPITAL"
+                    ? "bg-sky-500/15 text-sky-700 dark:text-sky-300"
+                    : kind === "ASC"
+                      ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                      : "bg-slate-500/15 text-slate-700 dark:text-slate-300";
+                return (
+                  <tr key={a.id} className="border-t border-black/5 dark:border-white/5">
+                    <td className="py-1 pr-3">
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${kindColor}`}>
+                        {kind}
+                      </span>
+                    </td>
+                    <td className="py-1 pr-3">{a.facility.name}</td>
+                    <td className="py-1 pr-3 text-xs">
+                      {[a.facility.city, a.facility.state].filter(Boolean).join(", ")}
+                    </td>
+                    <td className="py-1 pr-3 font-mono text-xs opacity-80">{a.ccn}</td>
+                    <td className="py-1 text-xs opacity-70">
+                      {a.source === "CMS_FACILITY_AFFILIATION"
+                        ? "CMS (verified)"
+                        : a.source === "INFERRED_ZIP_CITY"
+                          ? "inferred (ZIP+city)"
+                          : a.source}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Section>
+      )}
 
       <Section title="Addresses">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

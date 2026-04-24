@@ -23,6 +23,9 @@ export interface ParsedFilters {
   includeDeactivated: boolean;
   activeIrOnly: boolean;
   practiceSetting: string; // "", "OBL", "FACILITY", "MIXED"
+  ascAffiliated: boolean;
+  hospitalAffiliated: boolean;
+  oblOrAsc: boolean;
   sortBy: "lastName" | "enumerationDate" | "irVolume";
   page: number;
 }
@@ -45,6 +48,9 @@ export function parseFilters(raw: Raw): ParsedFilters {
     includeDeactivated: first(raw.inactive) === "1",
     activeIrOnly: first(raw.active) === "1",
     practiceSetting: validSettings.has(settingRaw) ? settingRaw : "",
+    ascAffiliated: first(raw.asc) === "1",
+    hospitalAffiliated: first(raw.hosp) === "1",
+    oblOrAsc: first(raw.oblasc) === "1",
     sortBy,
     page: Math.max(1, parseInt(first(raw.page) ?? "1", 10) || 1),
   };
@@ -59,6 +65,9 @@ function appendFilters(params: URLSearchParams, filters: ParsedFilters): void {
   if (filters.includeDeactivated) params.set("inactive", "1");
   if (filters.activeIrOnly) params.set("active", "1");
   if (filters.practiceSetting) params.set("setting", filters.practiceSetting);
+  if (filters.ascAffiliated) params.set("asc", "1");
+  if (filters.hospitalAffiliated) params.set("hosp", "1");
+  if (filters.oblOrAsc) params.set("oblasc", "1");
   if (filters.sortBy !== "lastName") params.set("sort", filters.sortBy);
 }
 

@@ -27,6 +27,9 @@ export default async function Home({
       includeDeactivated: filters.includeDeactivated,
       activeIrOnly: filters.activeIrOnly,
       practiceSetting: filters.practiceSetting,
+      ascAffiliated: filters.ascAffiliated,
+      hospitalAffiliated: filters.hospitalAffiliated,
+      oblOrAsc: filters.oblOrAsc,
       sortBy: filters.sortBy,
       page: filters.page,
     }),
@@ -55,6 +58,9 @@ export default async function Home({
         includeDeactivated={filters.includeDeactivated}
         activeIrOnly={filters.activeIrOnly}
         practiceSetting={filters.practiceSetting}
+        ascAffiliated={filters.ascAffiliated}
+        hospitalAffiliated={filters.hospitalAffiliated}
+        oblOrAsc={filters.oblOrAsc}
         sortBy={filters.sortBy}
         states={states}
         metros={metros}

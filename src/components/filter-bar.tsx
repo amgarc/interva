@@ -11,6 +11,9 @@ interface FilterBarProps {
   includeDeactivated: boolean;
   activeIrOnly: boolean;
   practiceSetting: string;
+  ascAffiliated: boolean;
+  hospitalAffiliated: boolean;
+  oblOrAsc: boolean;
   sortBy: "lastName" | "enumerationDate" | "irVolume";
   states: string[];
   metros: MetroOption[];
@@ -26,6 +29,9 @@ export function FilterBar({
   includeDeactivated,
   activeIrOnly,
   practiceSetting,
+  ascAffiliated,
+  hospitalAffiliated,
+  oblOrAsc,
   sortBy,
   states,
   metros,
@@ -40,6 +46,9 @@ export function FilterBar({
     includeDeactivated ||
     activeIrOnly ||
     practiceSetting ||
+    ascAffiliated ||
+    hospitalAffiliated ||
+    oblOrAsc ||
     sortBy !== "lastName";
 
   return (
@@ -137,6 +146,32 @@ export function FilterBar({
             defaultChecked={activeIrOnly}
           />
           <span title="Billed ≥25 IR Medicare services in 2023">Active IR only</span>
+        </label>
+
+        <label className="flex items-center gap-1.5 text-sm py-1.5">
+          <input
+            type="checkbox"
+            name="oblasc"
+            value="1"
+            defaultChecked={oblOrAsc}
+          />
+          <span title="OBL setting (PUF) OR ZIP/city-inferred ASC affiliation">
+            OBL or ASC
+          </span>
+        </label>
+
+        <label className="flex items-center gap-1.5 text-sm py-1.5">
+          <input type="checkbox" name="asc" value="1" defaultChecked={ascAffiliated} />
+          <span title="Practice address ZIP+city matches a Medicare-certified ASC">
+            ASC-affiliated
+          </span>
+        </label>
+
+        <label className="flex items-center gap-1.5 text-sm py-1.5">
+          <input type="checkbox" name="hosp" value="1" defaultChecked={hospitalAffiliated} />
+          <span title="Listed in CMS Facility Affiliation file as affiliated with a hospital">
+            Hospital-affiliated
+          </span>
         </label>
 
         <label className="flex items-center gap-1.5 text-sm py-1.5">
