@@ -1,0 +1,2247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interva CoE Physician Rubric</title>
+<style>
+  :root {
+    --bg:#f5f7fa;
+    --surface:#ffffff;
+    --surface-alt:#fafbfc;
+    --text:#0f172a;
+    --text-soft:#334155;
+    --muted:#64748b;
+    --border:#e2e8f0;
+    --border-strong:#cbd5e1;
+    --primary:#1e4976;
+    --primary-hover:#163554;
+    --primary-soft:#e8eef5;
+    --success:#15803d;
+    --success-soft:#dcfce7;
+    --danger:#b91c1c;
+    --danger-soft:#fee2e2;
+    --warning:#b45309;
+    --warning-soft:#fef3c7;
+    --info:#0369a1;
+    --info-soft:#e0f2fe;
+    --radius:6px;
+    --radius-lg:10px;
+    --shadow-sm:0 1px 2px rgba(15,23,42,.04);
+    --shadow:0 1px 3px rgba(15,23,42,.08), 0 1px 2px rgba(15,23,42,.04);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text); background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{margin:0; font-weight:600; color:var(--text)}
+  h1{font-size:20px}
+  h2{font-size:17px}
+  h3{font-size:15px}
+  h4{font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted)}
+  p{margin:0 0 8px}
+  a{color:var(--primary); text-decoration:none}
+  a:hover{text-decoration:underline}
+  button{
+    font:inherit; cursor:pointer; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--text); padding:7px 14px;
+    border-radius:var(--radius); transition:all .12s;
+  }
+  button:hover{background:var(--surface-alt); border-color:var(--muted)}
+  button.primary{background:var(--primary); color:#fff; border-color:var(--primary)}
+  button.primary:hover{background:var(--primary-hover); border-color:var(--primary-hover)}
+  button.danger{color:var(--danger); border-color:var(--danger-soft)}
+  button.danger:hover{background:var(--danger-soft)}
+  button.ghost{border-color:transparent; background:transparent; color:var(--muted)}
+  button.ghost:hover{background:var(--surface-alt); color:var(--text)}
+  input[type="text"],input[type="number"],input[type="date"],textarea,select{
+    font:inherit; width:100%; padding:7px 10px;
+    border:1px solid var(--border-strong); border-radius:var(--radius);
+    background:var(--surface); color:var(--text);
+  }
+  input:focus,textarea:focus,select:focus{outline:none; border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft)}
+  textarea{resize:vertical; min-height:70px; font-family:inherit}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:4px; font-weight:500}
+  .field{margin-bottom:14px}
+  .row{display:flex; gap:12px; flex-wrap:wrap}
+  .row > *{flex:1; min-width:0}
+
+  /* Layout */
+  header.topbar{
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:12px 24px; display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:10;
+  }
+  header.topbar .brand{display:flex; align-items:baseline; gap:10px}
+  header.topbar .brand .title{font-weight:700; color:var(--primary)}
+  header.topbar .brand .subtitle{font-size:12px; color:var(--muted)}
+  header.topbar nav{display:flex; gap:8px; align-items:center}
+
+  main{max-width:1100px; margin:0 auto; padding:24px}
+
+  .card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-sm);
+    margin-bottom:16px;
+  }
+  .card h2{margin-bottom:10px}
+  .card h3{margin-bottom:8px}
+  .card-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:12px}
+
+  /* Dashboard */
+  .dash-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:12px; flex-wrap:wrap}
+  .dash-actions{display:flex; gap:8px; flex-wrap:wrap}
+  table{width:100%; border-collapse:collapse}
+  thead th{
+    text-align:left; padding:10px 12px; font-size:12px; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--muted); border-bottom:1px solid var(--border);
+    cursor:pointer; user-select:none; background:var(--surface-alt);
+  }
+  thead th:hover{color:var(--text)}
+  thead th .sort-ind{opacity:.5; margin-left:4px}
+  thead th.sorted .sort-ind{opacity:1}
+  tbody td{padding:12px; border-bottom:1px solid var(--border); vertical-align:middle}
+  tbody tr{cursor:pointer; transition:background .12s}
+  tbody tr:hover{background:var(--surface-alt)}
+  tbody tr.empty:hover{background:transparent; cursor:default}
+  tbody tr.empty td{text-align:center; color:var(--muted); padding:40px 12px}
+
+  /* Tabs */
+  .tabs{
+    display:flex; gap:2px; border-bottom:1px solid var(--border);
+    margin-bottom:20px; overflow-x:auto; padding-bottom:0;
+  }
+  .tab{
+    padding:10px 16px; background:transparent; border:none; color:var(--muted);
+    border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap;
+    font-weight:500; transition:all .12s;
+  }
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--primary); border-bottom-color:var(--primary); font-weight:600}
+
+  /* Candidate header */
+  .cand-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:8px; gap:16px; flex-wrap:wrap;
+  }
+  .cand-title{display:flex; align-items:baseline; gap:10px}
+  .cand-meta{font-size:12px; color:var(--muted)}
+  .live-total{
+    display:flex; align-items:center; gap:12px; background:var(--primary-soft);
+    padding:8px 14px; border-radius:var(--radius); border:1px solid var(--primary-soft);
+  }
+  .live-total .total{font-size:22px; font-weight:700; color:var(--primary); line-height:1}
+  .live-total .of{font-size:12px; color:var(--muted)}
+  .live-total .tier-pill{font-size:11px; padding:3px 8px; border-radius:12px; background:var(--surface); border:1px solid var(--border); font-weight:600}
+
+  /* Score band cards */
+  .band-group{display:flex; flex-direction:column; gap:8px; margin-bottom:10px}
+  .band{
+    display:flex; gap:12px; padding:12px 14px; border:1.5px solid var(--border);
+    border-radius:var(--radius); cursor:pointer; background:var(--surface);
+    transition:all .12s; align-items:flex-start;
+  }
+  .band:hover{border-color:var(--muted); background:var(--surface-alt)}
+  .band.selected{border-color:var(--primary); background:var(--primary-soft); box-shadow:0 0 0 2px var(--primary-soft)}
+  .band input[type="radio"]{margin-top:3px; flex-shrink:0}
+  .band-body{flex:1}
+  .band-label{font-weight:700; color:var(--primary); margin-right:8px; font-variant-numeric:tabular-nums}
+  .band.selected .band-label{color:var(--primary-hover)}
+  .band-title{font-weight:600; color:var(--text); font-size:13px}
+  .band-anchor{color:var(--text-soft); margin-top:3px; font-size:13px; line-height:1.45}
+
+  /* Band refinement */
+  .band-refine{
+    display:flex; align-items:center; gap:10px; margin-top:6px;
+    padding:10px 14px; background:var(--surface-alt); border-radius:var(--radius);
+    border:1px solid var(--border);
+  }
+  .band-refine label{margin-bottom:0}
+  .band-refine input[type="number"]{width:70px; text-align:center; font-weight:600; font-variant-numeric:tabular-nums}
+  .band-refine .suggested{font-size:12px; color:var(--muted)}
+
+  /* Rationale / callout */
+  .callout{
+    padding:12px 14px; border-radius:var(--radius); margin-bottom:14px;
+    border:1px solid var(--border); background:var(--surface-alt);
+    font-size:13px; line-height:1.5; color:var(--text-soft);
+  }
+  .callout.info{background:var(--info-soft); border-color:#bfdbfe}
+  .callout.warning{background:var(--warning-soft); border-color:#fcd34d}
+  .callout.danger{background:var(--danger-soft); border-color:#fca5a5; color:var(--danger)}
+  .callout.success{background:var(--success-soft); border-color:#86efac; color:var(--success)}
+  .callout-title{font-weight:600; margin-bottom:4px; color:inherit}
+  details.callout > summary{cursor:pointer; font-weight:600; list-style:none}
+  details.callout > summary::-webkit-details-marker{display:none}
+  details.callout > summary::before{content:"▸ "; transition:transform .15s; display:inline-block}
+  details.callout[open] > summary::before{content:"▾ "}
+  details.callout[open] > *:not(summary){margin-top:10px}
+
+  /* Checkbox items (B2, C2) */
+  .check-list{display:flex; flex-direction:column; gap:6px}
+  .check-item{
+    display:flex; gap:12px; padding:10px 12px; border:1px solid var(--border);
+    border-radius:var(--radius); cursor:pointer; background:var(--surface);
+    align-items:flex-start; transition:all .1s;
+  }
+  .check-item:hover{background:var(--surface-alt)}
+  .check-item.checked{background:var(--success-soft); border-color:#86efac}
+  .check-item input[type="checkbox"]{margin-top:3px; flex-shrink:0}
+  .check-body{flex:1}
+  .check-title{font-weight:600; font-size:13px; display:flex; justify-content:space-between; gap:10px}
+  .check-desc{color:var(--muted); font-size:12px; margin-top:2px; line-height:1.45}
+  .check-weight{background:var(--primary-soft); color:var(--primary); padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700; flex-shrink:0}
+  .check-na-toggle{
+    margin-top:6px; padding:6px 10px; background:var(--surface); border:1px dashed var(--border-strong);
+    border-radius:var(--radius); font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center;
+  }
+  .check-na-toggle input{margin:0}
+
+  /* Dimension A volume table */
+  .volume-table{width:100%; border-collapse:collapse; font-size:13px}
+  .volume-table th{text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); font-size:11px; text-transform:uppercase; color:var(--muted); background:var(--surface-alt)}
+  .volume-table td{padding:6px 8px; border-bottom:1px solid var(--border)}
+  .volume-table input[type="number"]{width:80px; padding:4px 8px; text-align:right; font-variant-numeric:tabular-nums}
+  .volume-table .meets{color:var(--success); font-weight:600}
+  .volume-table .short{color:var(--muted)}
+  .volume-aggregate{
+    display:flex; gap:20px; align-items:center; padding:12px 14px;
+    background:var(--primary-soft); border-radius:var(--radius); margin-top:12px;
+  }
+  .volume-aggregate .label{font-size:12px; color:var(--muted)}
+  .volume-aggregate .value{font-size:20px; font-weight:700; color:var(--primary); font-variant-numeric:tabular-nums}
+
+  .score-readout{
+    display:flex; gap:20px; align-items:center; padding:12px 16px;
+    background:var(--primary-soft); border-radius:var(--radius); border:1px solid var(--primary-soft);
+  }
+  .score-readout-label{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600}
+  .score-readout-value{font-size:26px; font-weight:700; color:var(--primary); line-height:1; font-variant-numeric:tabular-nums; margin-top:2px}
+  .score-readout-band{flex:1; font-size:13px; color:var(--text)}
+
+  .interest-row{display:flex; gap:8px; flex-wrap:wrap}
+  .interest-opt{
+    display:flex; gap:6px; align-items:center; padding:7px 12px;
+    border:1.5px solid var(--border); border-radius:var(--radius);
+    cursor:pointer; font-size:13px; background:var(--surface);
+    transition:all .12s; font-weight:500;
+  }
+  .interest-opt:hover{border-color:var(--muted); background:var(--surface-alt)}
+  .interest-opt.sel{border-color:var(--primary); background:var(--primary-soft); color:var(--primary); font-weight:600}
+  .interest-opt input{margin:0}
+
+  /* Baseline gates */
+  .gate{
+    padding:12px 14px; border:1px solid var(--border); border-radius:var(--radius);
+    margin-bottom:10px; background:var(--surface);
+  }
+  .gate-head{display:flex; justify-content:space-between; gap:10px; align-items:flex-start; margin-bottom:8px}
+  .gate-title{font-weight:600; font-size:13px}
+  .gate-desc{color:var(--muted); font-size:12px; margin-top:2px; line-height:1.45}
+  .gate-options{display:flex; gap:6px}
+  .gate-opt{
+    padding:4px 10px; border:1px solid var(--border-strong); border-radius:12px;
+    background:var(--surface); font-size:12px; cursor:pointer; font-weight:500;
+  }
+  .gate-opt.sel-pass{background:var(--success-soft); border-color:#86efac; color:var(--success)}
+  .gate-opt.sel-fail{background:var(--danger-soft); border-color:#fca5a5; color:var(--danger)}
+  .gate-opt.sel-unknown{background:var(--warning-soft); border-color:#fcd34d; color:var(--warning)}
+  .gate input{margin-top:6px}
+
+  /* Interview questions (D) */
+  .iq-block{
+    padding:14px; background:var(--info-soft); border-left:3px solid var(--info);
+    border-radius:var(--radius); margin-bottom:14px;
+  }
+  .iq-block h4{color:var(--info); margin-bottom:8px}
+  .iq-list{margin:0; padding-left:20px}
+  .iq-list li{margin-bottom:6px; color:var(--text); font-size:13px; line-height:1.5}
+  .talking-point{
+    padding:10px 12px; background:var(--warning-soft); border-left:3px solid var(--warning);
+    border-radius:var(--radius); margin-bottom:12px; font-size:13px; line-height:1.5;
+  }
+  .talking-point-title{font-weight:700; color:var(--warning); font-size:11px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px}
+
+  /* Summary */
+  .summary-total{text-align:center; padding:24px}
+  .summary-total .score{font-size:56px; font-weight:700; color:var(--primary); line-height:1; font-variant-numeric:tabular-nums}
+  .summary-total .of100{font-size:18px; color:var(--muted); font-weight:400}
+  .summary-total .tier-badge{
+    display:inline-block; margin-top:14px; padding:8px 18px; border-radius:20px;
+    font-weight:600; font-size:14px; border:2px solid transparent;
+  }
+  .tier-tier1{background:var(--success-soft); color:var(--success); border-color:#4ade80}
+  .tier-tier2{background:var(--primary-soft); color:var(--primary); border-color:#93c5fd}
+  .tier-conditional{background:var(--warning-soft); color:var(--warning); border-color:#fbbf24}
+  .tier-borderline{background:var(--warning-soft); color:var(--warning); border-color:#fcd34d}
+  .tier-notdesig{background:var(--danger-soft); color:var(--danger); border-color:#f87171}
+
+  .dim-bars{display:flex; flex-direction:column; gap:12px; margin-top:16px}
+  .dim-bar{display:flex; align-items:center; gap:12px}
+  .dim-bar .name{width:180px; font-weight:600; font-size:13px; flex-shrink:0}
+  .dim-bar .track{flex:1; height:22px; background:var(--surface-alt); border-radius:4px; border:1px solid var(--border); position:relative; overflow:hidden}
+  .dim-bar .fill{height:100%; background:var(--primary); transition:width .2s}
+  .dim-bar .fill.ok{background:var(--success)}
+  .dim-bar .fill.low{background:var(--warning)}
+  .dim-bar .fill.fail{background:var(--danger)}
+  .dim-bar .threshold{position:absolute; top:0; bottom:0; left:40%; width:2px; background:var(--danger); opacity:.7}
+  .dim-bar .val{width:90px; text-align:right; font-weight:600; font-variant-numeric:tabular-nums; font-size:13px}
+
+  .flags{display:flex; flex-direction:column; gap:8px}
+  .flag{padding:10px 12px; border-radius:var(--radius); font-size:13px; border-left:3px solid}
+  .flag.red{background:var(--danger-soft); border-color:var(--danger); color:var(--danger)}
+  .flag.amber{background:var(--warning-soft); border-color:var(--warning); color:var(--warning)}
+  .flag.blue{background:var(--info-soft); border-color:var(--info); color:var(--info)}
+  .flag.green{background:var(--success-soft); border-color:var(--success); color:var(--success)}
+
+  .breakdown{font-size:13px; width:100%; border-collapse:collapse}
+  .breakdown th{text-align:left; padding:6px 10px; color:var(--muted); font-size:11px; text-transform:uppercase; border-bottom:1px solid var(--border)}
+  .breakdown td{padding:6px 10px; border-bottom:1px solid var(--border)}
+  .breakdown td.num{text-align:right; font-variant-numeric:tabular-nums; font-weight:600}
+
+  /* Status pills */
+  .pill{display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; border:1px solid}
+  .pill-inprogress{background:var(--warning-soft); color:var(--warning); border-color:#fcd34d}
+  .pill-complete{background:var(--success-soft); color:var(--success); border-color:#86efac}
+  .pill-dq{background:var(--danger-soft); color:var(--danger); border-color:#fca5a5}
+
+  /* Print */
+  @media print {
+    body{background:#fff}
+    header.topbar, .tabs, .no-print, button{display:none !important}
+    main{max-width:none; padding:0}
+    .card{break-inside:avoid; box-shadow:none; border:1px solid #ddd; margin-bottom:12px}
+    .dim-section{page-break-before:always}
+    .dim-section:first-of-type{page-break-before:auto}
+    .callout{background:#f9f9f9 !important; color:#333 !important}
+  }
+
+  /* Evidence (compact, baseline-only) */
+  .evidence-compact{margin-top:8px}
+  .evidence-toggle{
+    font:inherit; background:transparent; border:none; padding:2px 0; cursor:pointer;
+    color:var(--muted); display:inline-flex; align-items:center; gap:6px; font-size:12px;
+    border-radius:0;
+  }
+  .evidence-toggle:hover{color:var(--primary); background:transparent; border-color:transparent}
+  .evidence-toggle .icon{font-size:13px; line-height:1}
+  .evidence-toggle.has-files{color:var(--primary); font-weight:500}
+  .evidence-toggle .caret{font-size:9px; color:var(--muted)}
+  .evidence-toggle .count{
+    background:var(--primary-soft); color:var(--primary); padding:0 6px;
+    border-radius:8px; font-size:11px; font-weight:700; min-width:18px; text-align:center;
+  }
+  .evidence-list{
+    margin-top:6px; padding:8px 10px; background:var(--surface-alt);
+    border:1px solid var(--border); border-radius:var(--radius);
+  }
+  .attachment-row{
+    display:flex; gap:10px; align-items:center; padding:6px 8px;
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    margin-bottom:4px;
+  }
+  .attachment-row:last-of-type{margin-bottom:6px}
+  .attachment-info{flex:1; min-width:0}
+  .attachment-name{font-weight:600; font-size:12px; word-break:break-all}
+  .attachment-meta{font-size:11px; color:var(--muted); margin-top:1px}
+  .attachment-actions{display:flex; gap:3px; flex-shrink:0}
+  .attachment-actions button{padding:2px 7px; font-size:11px}
+  .evidence-list .add-more{padding:3px 8px; font-size:11px}
+
+  /* Tiny helpers */
+  .spacer{height:14px}
+  .muted{color:var(--muted)}
+  .right{text-align:right}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .tabular{font-variant-numeric:tabular-nums}
+  .small{font-size:12px}
+  .nowrap{white-space:nowrap}
+</style>
+</head>
+<body>
+<header class="topbar no-print">
+  <div class="brand">
+    <span class="title">INTERVA</span>
+    <span class="subtitle">CoE Physician Selection Rubric · v3</span>
+  </div>
+  <nav>
+    <a href="#/dashboard"><button class="ghost">Dashboard</button></a>
+  </nav>
+</header>
+
+<main id="app"></main>
+
+<input type="file" id="importFile" accept="application/json" style="display:none" onchange="handleImport(event)">
+<input type="file" id="attachFileInput" style="display:none" onchange="handleAttach(event)">
+
+<script>
+/* ============================================================
+ * RUBRIC REFERENCE DATA (from v3 Detailed Scoring Specification)
+ * ============================================================ */
+
+const BASELINE_GATES = [
+  { id:'g1_board_cert', title:'ABMS Board Certification (VIR / IR)',
+    desc:'ABMS primary source verification. Disqualifies if expired, lapsed, or never obtained (diagnostic radiology alone without IR subspecialty does not qualify).' },
+  { id:'g2_license', title:'Unrestricted Medical License',
+    desc:'State medical board query for every state of practice. Any active restriction, suspension, probation, or surrender is disqualifying.' },
+  { id:'g3_exclusions', title:'No disciplinary action, sanctions, or program exclusions',
+    desc:'No current or past disciplinary action by a state medical board or specialty board, no hospital privilege restriction or revocation, no DEA action, no exclusion from a Federal healthcare program (Medicare, Medicaid, OIG-LEIE, SAM.gov), no debarment. Interva verifies via NPDB, OIG-LEIE, and SAM.gov queries.' },
+  { id:'g4_malpractice', title:'Malpractice Coverage & Claims History',
+    desc:'Active coverage; no open judgments >$250K; no pattern of >3 closed claims in 5 years. Verified via certificate of insurance + physician attestation.' },
+  { id:'g5_practice_auth', title:'Active Clinical Practice Authorization',
+    desc:'State-licensed OBL, AAAHC/JC-accredited ASC, or hospital privileges. Any one setting satisfies the requirement (hospital privileges no longer required).' },
+  { id:'g6_dea', title:'DEA Registration (if moderate/deep sedation used)',
+    desc:'DEA CSOS verification. Required only if the practice uses moderate/deep sedation; mark Pass if N/A.' }
+];
+
+const PROCEDURES = [
+  { key:'ufe',        name:'Uterine Fibroid Embolization (UFE)',                            compThreshold:'<4%',  pro:'UFS-QOL' },
+  { key:'pae',        name:'Prostate Artery Embolization (PAE)',                             compThreshold:'<5%',  pro:'IPSS + IPSS-QOL' },
+  { key:'hae',        name:'Hemorrhoidal Artery Embolization (HAE)',                         compThreshold:'<5%',  pro:'PROMIS GI + HBS' },
+  { key:'gae',        name:'Genicular Artery Embolization (GAE)',                             compThreshold:'<3%',  pro:'VAS + WOMAC' },
+  { key:'pad',        name:'PAD Revascularization (incl. diabetic foot / wound)',             compThreshold:'<3%',  pro:'VascuQoL-6' },
+  { key:'dialysis',   name:'Dialysis Access Maintenance',                                     compThreshold:'<2%',  pro:'KDQOL-SF12' },
+  { key:'varicocele', name:'Varicocele Embolization',                                         compThreshold:'<2%',  pro:'PROMIS Pain Interference SF' },
+  { key:'pelvic',     name:'Pelvic Vein Embolization',                                         compThreshold:'<3%',  pro:'PROMIS Pain Interference SF' },
+  { key:'pavf',       name:'Percutaneous AVF Creation (pAVF)',                                compThreshold:'<5%',  pro:'KDQOL-SF12' }
+];
+
+/* Default per-procedure minimum volume thresholds (editable; rubric ships blank).
+ * Sensible defaults inferred from SIR/NICE/SVS/KDOQI literature so the tool
+ * produces meaningful output on day one. User can edit globally from Dim A. */
+const DEFAULT_MINIMUMS = {
+  ufe:20, pae:15, hae:10, gae:10, pad:50, dialysis:50, varicocele:10, pelvic:10, pavf:5
+};
+
+const B2_ITEMS = [
+  { id:'fluoro',     title:'Fixed or portable C-arm fluoroscopy with DSA',
+    desc:'Siemens Artis, GE OEC 9900/Elite, Philips Azurion, Ziehm, or equivalent with digital subtraction angiography capability.' },
+  { id:'us',         title:'Vascular ultrasound with Doppler',
+    desc:'Dedicated vascular ultrasound unit; used for access, guidance, and follow-up assessment.' },
+  { id:'sedation',   title:'Moderate sedation protocol with continuous monitoring',
+    desc:'Continuous pulse oximetry, cardiac monitoring, written sedation protocol; ACLS-certified provider present during all procedures.' },
+  { id:'recovery',   title:'Post-procedure recovery area with monitored observation',
+    desc:'Dedicated recovery bay with nursing staff; ≥2-hour observation capability; written discharge criteria protocol.' },
+  { id:'transfer',   title:'Emergency transfer agreement with acute-care hospital',
+    desc:'Written transfer agreement with hospital reachable within 30-minute ground transport; current and signed.' },
+  { id:'crash',      title:'Crash cart with resuscitation meds and defibrillator',
+    desc:'On-site, inspected per facility policy (minimum quarterly); staff trained in use.' },
+  { id:'radsafety',  title:'Radiation safety program',
+    desc:'Badge monitoring, dose tracking, shielding available, written radiation safety protocol per ACR/SIR guidelines.' }
+];
+
+const C2_ITEMS = [
+  { id:'virtex',        title:'SIR VIRTEX Registry or SIR QCDR participation', weight:3,
+    desc:'Registry enrollment confirmation or MIPS QCDR reporting documentation.' },
+  { id:'sir_templates', title:'SIR Standardized Report Templates (v3.1) or equivalent', weight:1,
+    desc:'Sample procedural report or attestation.' },
+  { id:'mm_committee',  title:'Internal M&M / quality committee (quarterly documented)', weight:1,
+    desc:'Meeting schedule or minutes (title page only).' },
+  { id:'research',      title:'Participates in or has published IR outcomes research', weight:1,
+    desc:'Peer-reviewed publication, abstract, or presentation documentation.' },
+  { id:'hiiq',          title:'Uses HI-IQ or equivalent electronic QA logging system', weight:1,
+    desc:'System access confirmation or screenshot.' }
+];
+
+/* Score bands — each with value range, title, anchor copy from rubric.
+ * `valueOnSelect` is what the score becomes when the band is clicked (high of band). */
+const BANDS = {
+  a1: [
+    { lo:17, hi:20, title:'High volume',        text:'≥150 cases/year; meets minimum threshold in at least one Tier 1 procedure.' },
+    { lo:13, hi:16, title:'Solid volume',       text:'75–149 cases/year; meets minimum threshold in at least one Tier 1 procedure.' },
+    { lo:9,  hi:12, title:'Moderate volume',    text:'40–74 cases/year; meets minimum threshold in at least one Tier 1 procedure.' },
+    { lo:5,  hi:8,  title:'Emerging Practice',  text:'20–39 cases/year (Emerging Practice pathway); meets minimum threshold in at least one Tier 1 procedure.' },
+    { lo:0,  hi:4,  title:'Below threshold',    text:'<20 cases/year, or does not meet minimum threshold in any Tier 1 procedure.' }
+  ],
+  a2: [
+    { lo:9, hi:10, title:'4+ service lines',    text:'4 or more Tier 1 service lines at or above minimum volume threshold.' },
+    { lo:7, hi:8,  title:'3 service lines',     text:'3 Tier 1 service lines at or above minimum volume threshold.' },
+    { lo:4, hi:6,  title:'2 service lines',     text:'2 Tier 1 service lines at or above minimum volume threshold.' },
+    { lo:1, hi:3,  title:'1 service line',      text:'1 Tier 1 service line at or above minimum volume threshold (focused specialist).' },
+    { lo:0, hi:0,  title:'None meet minimum',   text:'No Tier 1 service line meets minimum volume threshold.' }
+  ],
+  b1: [
+    { lo:11, hi:12, title:'Owns/operates OBL or ASC',  text:'Owns/operates state-licensed OBL or accredited ASC; performs ≥75% of Tier 1 cases there.' },
+    { lo:8,  hi:10, title:'Has access, mixed setting', text:'Has access to qualifying OBL/ASC; performs 25–74% of Tier 1 cases there; remainder hospital-based.' },
+    { lo:5,  hi:7,  title:'Active buildout plan',      text:'Hospital-based only but has active OBL/ASC buildout plan: signed LOI, active lease, or equipment on order with target operational date within 12 months.' },
+    { lo:3,  hi:4,  title:'Willing, no capital yet',   text:'Hospital-based; willing to transition Interva cases to qualifying OBL/ASC but has not yet committed capital.' },
+    { lo:0,  hi:2,  title:'No pathway',                text:'Hospital-based only; no pathway or willingness to transition to OBL/ASC.' }
+  ],
+  b3: [
+    { lo:5, hi:5, title:'Dedicated IR team (72h consult)', text:'Dedicated IR clinical team: IR tech or RN circulator, recovery nurse, front-office coordinator; accommodates new Interva consult within 72 hours of referral; named point of contact for Interva scheduling.' },
+    { lo:3, hi:4, title:'Shared staffing (1-week)',        text:'Shared staffing model; can reliably schedule Interva cases within 1 week; named point of contact identified for Interva referrals.' },
+    { lo:1, hi:2, title:'Ad hoc staffing',                 text:'Ad hoc staffing; scheduling capacity uncertain; general willingness but no dedicated Interva contact or defined scheduling protocol.' },
+    { lo:0, hi:0, title:'Insufficient capacity',           text:'Insufficient staffing to accommodate additional case volume; cannot identify pathway to serve Interva referrals.' }
+  ],
+  c1: [
+    { lo:7, hi:8, title:'Active tracking, cites own rates', text:'Cites specific complication rates from own practice that are plausible and at/below SIR thresholds; demonstrates active tracking methodology (logbook, database, EHR query, or registry).' },
+    { lo:5, hi:6, title:'Plausible directional estimates', text:'Provides directional estimates that are clinically plausible; acknowledges tracking limitations; demonstrates awareness of SIR thresholds and AE classification.' },
+    { lo:3, hi:4, title:'Aware of categories, no rates',   text:'Aware of complication categories but cannot provide specific rates; expresses willingness to begin systematic tracking.' },
+    { lo:1, hi:2, title:'Vague; limited SIR awareness',    text:'Vague about complications; limited awareness of SIR quality framework.' },
+    { lo:0, hi:0, title:'Dismissive of quality tracking',  text:'Dismissive of quality tracking; unable or unwilling to discuss complication experience.' }
+  ],
+  c3: [
+    { lo:9, hi:10, title:'Currently collects validated PROs', text:'Currently collects at least one validated PRO instrument for primary procedure(s); can demonstrate baseline and follow-up data; enthusiastic about full Interva protocol adoption.' },
+    { lo:6, hi:8,  title:'Informal tracking, commits to protocol', text:'Does not collect formal PROs but tracks functional outcomes informally (symptom follow-up notes, imaging follow-up); commits to full Interva PRO protocol; understands specific instruments and workflow integration.' },
+    { lo:3, hi:5,  title:'No current tracking, willing',      text:'No current outcomes tracking beyond standard clinical follow-up; willing to adopt Interva protocol; asks constructive questions about implementation burden.' },
+    { lo:1, hi:2,  title:'Minimal interest',                  text:'Minimal interest in outcomes tracking; concerned about administrative burden; needs significant persuasion.' },
+    { lo:0, hi:0,  title:'Unwilling',                         text:'Unwilling to commit to any standardized outcomes collection.' }
+  ],
+  d1: [
+    { lo:5, hi:6, title:'VBC experience or clear grasp', text:'Prior bundled/VBC experience OR clear understanding of episode-based risk; articulates how their practice model supports it (low complication rates, OBL cost structure); engages constructively with pricing.' },
+    { lo:3, hi:4, title:'Grasps after explanation',      text:'No prior experience but grasps the concept after explanation; asks smart questions about mechanics and stop-loss; open to learning.' },
+    { lo:1, hi:2, title:'Significant concerns',          text:'Significant concerns; needs substantial education before committing.' },
+    { lo:0, hi:0, title:'Opposed to per-episode risk',   text:'Fundamentally opposed to per-episode risk; insists on fee-for-service.' }
+  ],
+  d3: [
+    { lo:5, hi:5, title:'Structured journey + testimonials', text:'Structured patient journey: dedicated pre-procedure consultation; informed consent comparing IR vs. surgical options; post-procedure follow-up protocol (same-day call, 7-day check-in, 30-day visit). Has existing testimonials or positive reviews. Welcomes Interva concierge integration.' },
+    { lo:3, hi:4, title:'Genuine care, informal approach',   text:'Genuine care for patient experience but informal approach. Post-procedure follow-up exists but is ad hoc. Open to Interva concierge workflow.' },
+    { lo:1, hi:2, title:'Minimal engagement',                text:'Minimal patient engagement; relies heavily on referring physician for pre/post communication.' },
+    { lo:0, hi:0, title:'Dismissive of patient experience',  text:'Dismissive of patient experience as quality dimension; resistant to external engagement workflow.' }
+  ],
+  d4: [
+    { lo:3, hi:3, title:'Fast scheduling AND meaningful capacity', text:'Consistently schedules new consults within 72 hours and procedures within 2 weeks; can absorb 10+ additional Interva cases per month without operational strain.' },
+    { lo:2, hi:2, title:'Moderate scheduling, limited capacity',   text:'Can schedule within 1 week and procedure within 4 weeks; can absorb 3–10 additional cases per month; some ramp-up required.' },
+    { lo:1, hi:1, title:'Tight scheduling or minimal headroom',    text:'Scheduling uncertain OR capacity limited (fewer than 3 additional cases per month); would need operational adjustments to take Interva volume.' },
+    { lo:0, hi:0, title:'No available capacity',                   text:'Cannot accommodate additional referral volume; practice is at or over capacity.' }
+  ]
+};
+
+const DIM_MAX = { a1:20, a2:10, b1:12, b2:7, b3:5, c1:8, c2:7, c3:10, d1:6, d3:5, d4:3 };
+const DIM_GROUP_MAX = { A:30, B:24, C:25, D:14 };
+const TOTAL_MAX = 93;
+
+/* ============================================================
+ * STATE & STORAGE
+ * ============================================================ */
+
+const STORAGE_KEY = 'interva_coe_v1';
+const MINIMUMS_KEY = 'interva_coe_minimums_v1';
+const IDB_NAME = 'interva_coe_attachments';
+const IDB_STORE = 'attachments';
+const IDB_VERSION = 1;
+
+let state = loadState();
+let globalMinimums = loadMinimums();
+let currentView = { name:'dashboard' };
+let sortBy = { col:'updatedAt', dir:'desc' };
+
+/* In-memory attachment metadata cache (blobs stay in IndexedDB).
+ * Keyed by candidateId → array of { id, itemKey, filename, size, mimeType, uploadedAt }. */
+let attachmentsCache = {};
+let pendingAttachKey = null;   // set before triggering the hidden file input
+let idbReady = null;           // Promise resolving to the open DB
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.candidates)) {
+        parsed.candidates.forEach(migrateCandidate);
+        return parsed;
+      }
+    }
+  } catch (e) { console.warn('loadState failed', e); }
+  return { version:1, candidates:[] };
+}
+
+/* Ensure candidates saved under older schemas have every field the current
+ * code expects. Without this, setByPath silently throws when we try to assign
+ * into an undefined parent (e.g. dimensionA.serviceLines before it existed),
+ * and the render that would show the recalculation never runs. Idempotent. */
+function migrateCandidate(c) {
+  if (!c || typeof c !== 'object') return c;
+  const blank = blankCandidate();
+
+  // Top-level fields that might be missing
+  ['name','npi','reviewer','status','createdAt','updatedAt','overallNotes'].forEach(k => {
+    if (!(k in c)) c[k] = blank[k];
+  });
+
+  // Background (added in a later version)
+  c.background = c.background || {};
+  Object.keys(blank.background).forEach(k => {
+    if (!(k in c.background)) c.background[k] = blank.background[k];
+  });
+
+  // Baseline
+  c.baseline = c.baseline || {};
+  Object.keys(blank.baseline).forEach(k => {
+    if (!(k in c.baseline)) c.baseline[k] = blank.baseline[k];
+  });
+
+  // Dimension A — ensure volumes + serviceLines exist, with all current procedures keyed
+  c.dimensionA = c.dimensionA || {};
+  c.dimensionA.volumes = c.dimensionA.volumes || {};
+  c.dimensionA.serviceLines = c.dimensionA.serviceLines || {};
+  PROCEDURES.forEach(p => {
+    if (!(p.key in c.dimensionA.volumes)) c.dimensionA.volumes[p.key] = null;
+    if (!(p.key in c.dimensionA.serviceLines)) c.dimensionA.serviceLines[p.key] = false;
+  });
+  if (!('notes' in c.dimensionA)) c.dimensionA.notes = '';
+
+  // Dimension B
+  c.dimensionB = c.dimensionB || {};
+  c.dimensionB.b2_items = c.dimensionB.b2_items || {};
+  B2_ITEMS.forEach(it => {
+    if (!(it.id in c.dimensionB.b2_items)) c.dimensionB.b2_items[it.id] = false;
+  });
+  if (!('b1_score' in c.dimensionB)) c.dimensionB.b1_score = 0;
+  if (!('b3_score' in c.dimensionB)) c.dimensionB.b3_score = 0;
+  if (!('notes' in c.dimensionB))    c.dimensionB.notes = '';
+
+  // Dimension C
+  c.dimensionC = c.dimensionC || {};
+  c.dimensionC.c2_items = c.dimensionC.c2_items || {};
+  C2_ITEMS.forEach(it => {
+    if (!(it.id in c.dimensionC.c2_items)) c.dimensionC.c2_items[it.id] = false;
+  });
+  if (!('c1_score' in c.dimensionC)) c.dimensionC.c1_score = 0;
+  if (!('c3_score' in c.dimensionC)) c.dimensionC.c3_score = 0;
+  if (!('notes' in c.dimensionC))    c.dimensionC.notes = '';
+
+  // Dimension D
+  c.dimensionD = c.dimensionD || {};
+  ['d1_score','d1_prior_vbc','d1_notes','d3_score','d3_notes','d4_score','d4_notes'].forEach(k => {
+    if (!(k in c.dimensionD)) c.dimensionD[k] = blank.dimensionD[k];
+  });
+
+  return c;
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { alert('Could not save: ' + e.message); }
+}
+
+function loadMinimums() {
+  try {
+    const raw = localStorage.getItem(MINIMUMS_KEY);
+    if (raw) return Object.assign({}, DEFAULT_MINIMUMS, JSON.parse(raw));
+  } catch (e) {}
+  return Object.assign({}, DEFAULT_MINIMUMS);
+}
+
+function saveMinimums() {
+  localStorage.setItem(MINIMUMS_KEY, JSON.stringify(globalMinimums));
+}
+
+/* ============================================================
+ * INDEXEDDB (BINARY ATTACHMENTS)
+ *
+ * Schema — object store `attachments`:
+ *   { id (uuid, keyPath), candidateId, itemKey, filename,
+ *     mimeType, size, uploadedAt, notes, blob }
+ * Indexes: candidateId
+ * ============================================================ */
+
+function openIDB() {
+  if (idbReady) return idbReady;
+  idbReady = new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        const store = db.createObjectStore(IDB_STORE, { keyPath:'id' });
+        store.createIndex('candidateId', 'candidateId', { unique:false });
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  return idbReady;
+}
+
+function idbTx(mode) {
+  return openIDB().then(db => db.transaction(IDB_STORE, mode).objectStore(IDB_STORE));
+}
+
+function idbPut(record) {
+  return idbTx('readwrite').then(store => new Promise((resolve, reject) => {
+    const r = store.put(record);
+    r.onsuccess = () => resolve(record);
+    r.onerror = () => reject(r.error);
+  }));
+}
+
+function idbGet(id) {
+  return idbTx('readonly').then(store => new Promise((resolve, reject) => {
+    const r = store.get(id);
+    r.onsuccess = () => resolve(r.result || null);
+    r.onerror = () => reject(r.error);
+  }));
+}
+
+function idbDelete(id) {
+  return idbTx('readwrite').then(store => new Promise((resolve, reject) => {
+    const r = store.delete(id);
+    r.onsuccess = () => resolve();
+    r.onerror = () => reject(r.error);
+  }));
+}
+
+function idbGetByCandidate(candidateId) {
+  return idbTx('readonly').then(store => new Promise((resolve, reject) => {
+    const results = [];
+    const idx = store.index('candidateId');
+    const r = idx.openCursor(IDBKeyRange.only(candidateId));
+    r.onsuccess = (e) => {
+      const cur = e.target.result;
+      if (cur) { results.push(cur.value); cur.continue(); } else resolve(results);
+    };
+    r.onerror = () => reject(r.error);
+  }));
+}
+
+function idbGetAll() {
+  return idbTx('readonly').then(store => new Promise((resolve, reject) => {
+    const r = store.getAll();
+    r.onsuccess = () => resolve(r.result || []);
+    r.onerror = () => reject(r.error);
+  }));
+}
+
+function idbDeleteByCandidate(candidateId) {
+  return idbGetByCandidate(candidateId).then(recs =>
+    Promise.all(recs.map(r => idbDelete(r.id)))
+  );
+}
+
+/* Turn a full record (with blob) into the metadata-only shape we cache. */
+function stripBlob(rec) {
+  return {
+    id: rec.id, candidateId: rec.candidateId, itemKey: rec.itemKey,
+    filename: rec.filename, mimeType: rec.mimeType, size: rec.size,
+    uploadedAt: rec.uploadedAt, notes: rec.notes || ''
+  };
+}
+
+async function loadAttachmentsForCandidate(candidateId) {
+  const recs = await idbGetByCandidate(candidateId);
+  attachmentsCache[candidateId] = recs.map(stripBlob);
+}
+
+function getAttachments(candidateId, itemKey) {
+  const list = attachmentsCache[candidateId] || [];
+  return itemKey ? list.filter(a => a.itemKey === itemKey) : list;
+}
+
+function fmtSize(bytes) {
+  if (bytes == null) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(0) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+/* ============================================================
+ * CANDIDATE CREATION / DEFAULTS
+ * ============================================================ */
+
+function blankCandidate() {
+  const now = new Date().toISOString();
+  const volumes = {}, serviceLines = {};
+  PROCEDURES.forEach(p => { volumes[p.key]=null; serviceLines[p.key]=false; });
+  return {
+    id: (crypto.randomUUID ? crypto.randomUUID() : 'c_'+Math.random().toString(36).slice(2,11)),
+    name:'',
+    npi:'',
+    reviewer:'',
+    createdAt: now,
+    updatedAt: now,
+    status: 'in-progress',
+    background: {
+      medical_school:'', medical_school_year:'',
+      residency:'', residency_year:'',
+      fellowship:'', fellowship_year:'',
+      years_in_practice:null,
+      prior_practice:'',
+      current_practice:'',
+      publication_count:null,
+      publications_notes:'',
+      domestic_locum_interest:'',       // '' | 'interested' | 'open' | 'not-interested'
+      international_locum_interest:'',
+      additional_state_licensure:'',     // free text
+      locum_notes:'',
+      notes:''
+    },
+    baseline: {
+      g1_board_cert:'', g2_license:'', g3_exclusions:'', g4_malpractice:'',
+      g5_practice_auth:'', g6_dea:'', notes:''
+    },
+    dimensionA: { volumes, serviceLines, notes:'' },
+    dimensionB: {
+      b1_score:0,
+      b2_items:{ fluoro:false, us:false, sedation:false, recovery:false, transfer:false, crash:false, radsafety:false },
+      b3_score:0,
+      notes:''
+    },
+    dimensionC: {
+      c1_score:0,
+      c2_items:{ virtex:false, sir_templates:false, mm_committee:false, research:false, hiiq:false },
+      c3_score:0,
+      notes:''
+    },
+    dimensionD: {
+      d1_score:0, d1_prior_vbc:false, d1_notes:'',
+      d3_score:0, d3_notes:'',
+      d4_score:0, d4_notes:''
+    },
+    overallNotes:''
+  };
+}
+
+function createCandidate() {
+  const c = blankCandidate();
+  state.candidates.push(c);
+  saveState();
+  location.hash = '#/candidate/' + c.id;
+}
+
+function getCandidate(id) { return state.candidates.find(c => c.id === id); }
+function currentCandidate() { return currentView.name === 'candidate' ? getCandidate(currentView.id) : null; }
+
+async function deleteCandidate(id) {
+  const c = getCandidate(id);
+  if (!c) return;
+  const attachCount = (attachmentsCache[id] || []).length;
+  const msg = attachCount > 0
+    ? `Delete ${c.name || 'Unnamed candidate'} and ${attachCount} attached file${attachCount>1?'s':''}? This cannot be undone.`
+    : `Delete ${c.name || 'Unnamed candidate'}? This cannot be undone.`;
+  if (!confirm(msg)) return;
+  state.candidates = state.candidates.filter(x => x.id !== id);
+  saveState();
+  try { await idbDeleteByCandidate(id); } catch (e) { console.warn('Attachment cleanup failed', e); }
+  delete attachmentsCache[id];
+  render();
+}
+
+function touchCandidate(c) { c.updatedAt = new Date().toISOString(); }
+
+/* ============================================================
+ * SCORING
+ * ============================================================ */
+
+function aggregateVolume(c) {
+  return PROCEDURES.reduce((s,p) => s + (+c.dimensionA.volumes[p.key] || 0), 0);
+}
+
+function meetsMinCount(c) {
+  let n=0;
+  PROCEDURES.forEach(p => {
+    const v = +c.dimensionA.volumes[p.key] || 0;
+    const m = +globalMinimums[p.key] || 0;
+    if (m > 0 && v >= m) n++;
+  });
+  return n;
+}
+
+/* A1 is auto-calculated from aggregate volume + whether any procedure meets its minimum. */
+function computeA1(c) {
+  const agg = aggregateVolume(c);
+  const anyMet = meetsMinCount(c) > 0;
+  if (!anyMet) return Math.min(4, agg >= 10 ? 4 : (agg >= 5 ? 2 : (agg > 0 ? 1 : 0)));
+  if (agg >= 150) return 20;
+  if (agg >= 75)  return 16;
+  if (agg >= 40)  return 12;
+  if (agg >= 20)  return 8;
+  return 4;
+}
+
+function serviceLineCount(c) {
+  const sl = (c.dimensionA && c.dimensionA.serviceLines) || {};
+  let n = 0;
+  PROCEDURES.forEach(p => { if (sl[p.key]) n++; });
+  return n;
+}
+
+/* A2 is auto-calculated from the count of checked service lines. */
+function computeA2(c) {
+  const n = serviceLineCount(c);
+  if (n >= 4) return 10;
+  if (n === 3) return 8;
+  if (n === 2) return 6;
+  if (n === 1) return 3;
+  return 0;
+}
+
+function b2Total(c) {
+  const items = c.dimensionB.b2_items;
+  let n = 0;
+  B2_ITEMS.forEach(it => { if (items[it.id]) n++; });
+  return Math.min(DIM_MAX.b2, n);
+}
+
+function c2Total(c) {
+  let n = 0;
+  C2_ITEMS.forEach(it => { if (c.dimensionC.c2_items[it.id]) n += it.weight; });
+  return Math.min(7, n);
+}
+
+function subScores(c) {
+  const a1 = computeA1(c);
+  const a2 = computeA2(c);
+  const b1 = +c.dimensionB.b1_score || 0;
+  const b2 = b2Total(c);
+  const b3 = +c.dimensionB.b3_score || 0;
+  const c1 = +c.dimensionC.c1_score || 0;
+  const c2 = c2Total(c);
+  const c3 = +c.dimensionC.c3_score || 0;
+  const d1 = +c.dimensionD.d1_score || 0;
+  const d3 = +c.dimensionD.d3_score || 0;
+  const d4 = +c.dimensionD.d4_score || 0;
+  return { a1,a2,b1,b2,b3,c1,c2,c3,d1,d3,d4 };
+}
+
+function dimensionTotals(c) {
+  const s = subScores(c);
+  return {
+    A: s.a1 + s.a2,
+    B: s.b1 + s.b2 + s.b3,
+    C: s.c1 + s.c2 + s.c3,
+    D: s.d1 + s.d3 + s.d4
+  };
+}
+
+function totalScore(c) {
+  const d = dimensionTotals(c);
+  return d.A + d.B + d.C + d.D;
+}
+
+function baselineFailed(c) {
+  return ['g1_board_cert','g2_license','g3_exclusions','g4_malpractice','g5_practice_auth','g6_dea']
+    .some(k => c.baseline[k] === 'fail');
+}
+
+function dimFloorFail(c) {
+  const d = dimensionTotals(c);
+  return (d.A / DIM_GROUP_MAX.A < 0.4) ||
+         (d.B / DIM_GROUP_MAX.B < 0.4) ||
+         (d.C / DIM_GROUP_MAX.C < 0.4) ||
+         (d.D / DIM_GROUP_MAX.D < 0.4);
+}
+
+function dimPremierFail(c) {
+  const d = dimensionTotals(c);
+  return (d.A / DIM_GROUP_MAX.A < 0.5) ||
+         (d.B / DIM_GROUP_MAX.B < 0.5) ||
+         (d.C / DIM_GROUP_MAX.C < 0.5) ||
+         (d.D / DIM_GROUP_MAX.D < 0.5);
+}
+
+function determineTier(c) {
+  if (baselineFailed(c))  return { key:'notdesig', label:'Not Designated — Baseline DQ', shortLabel:'DQ' };
+  if (dimFloorFail(c))    return { key:'notdesig', label:'Not Designated — Dimension Floor (<40%)', shortLabel:'Not Designated' };
+  const total = totalScore(c);
+  const pct = TOTAL_MAX ? total / TOTAL_MAX : 0;
+  if (pct >= 0.85 && !dimPremierFail(c)) return { key:'tier1', label:'Tier 1: Premier CoE', shortLabel:'Tier 1' };
+  if (pct >= 0.65) return { key:'tier2', label:'Tier 2: Designated CoE', shortLabel:'Tier 2' };
+  const s = subScores(c);
+  const d = dimensionTotals(c);
+  if (s.a1 >= 5 && s.a1 <= 8 &&
+      d.B / DIM_GROUP_MAX.B >= 0.6 &&
+      d.C / DIM_GROUP_MAX.C >= 0.5 &&
+      d.D / DIM_GROUP_MAX.D >= 0.6) {
+    return { key:'conditional', label:'Flag: Candidate for Conditional Designation (Emerging Practice)', shortLabel:'Conditional?' };
+  }
+  if (pct >= 0.55) return { key:'borderline', label:'Flag: Borderline — Manual Review (55–64%)', shortLabel:'Borderline' };
+  return { key:'notdesig', label:'Not Designated', shortLabel:'Not Designated' };
+}
+
+function bandForScore(bandKey, score) {
+  return BANDS[bandKey].find(b => score >= b.lo && score <= b.hi) || null;
+}
+
+/* ============================================================
+ * UTILITIES
+ * ============================================================ */
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString(undefined,{ year:'numeric', month:'short', day:'numeric' });
+}
+
+function fmtDateShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+}
+
+function setByPath(obj, path, value) {
+  const parts = path.split('.');
+  let o = obj;
+  for (let i = 0; i < parts.length - 1; i++) o = o[parts[i]];
+  o[parts[parts.length - 1]] = value;
+}
+
+function getByPath(obj, path) {
+  return path.split('.').reduce((o,k) => (o ? o[k] : undefined), obj);
+}
+
+/* ============================================================
+ * ROUTING & TABS
+ * ============================================================ */
+
+function route() {
+  const h = location.hash || '#/dashboard';
+  const candMatch = h.match(/^#\/candidate\/([^\/]+)(?:\/([^\/]+))?/);
+  if (candMatch) {
+    const id = candMatch[1];
+    const tab = candMatch[2] || 'overview';
+    if (!getCandidate(id)) { location.hash = '#/dashboard'; return; }
+    currentView = { name:'candidate', id, tab };
+    if (!attachmentsCache[id]) {
+      attachmentsCache[id] = []; // show an empty state until IDB responds
+      loadAttachmentsForCandidate(id).then(render).catch(e => console.warn('Load attachments failed', e));
+    }
+  } else {
+    currentView = { name:'dashboard' };
+  }
+  render();
+  window.scrollTo({ top:0 });
+}
+
+function setTab(tab) {
+  location.hash = `#/candidate/${currentView.id}/${tab}`;
+}
+
+/* ============================================================
+ * HANDLERS (input/change)
+ * ============================================================ */
+
+function handleInput(el) {
+  const c = currentCandidate();
+  if (!c) return;
+  const path = el.dataset.path;
+  let val = el.value;
+  if (el.type === 'number') val = val === '' ? null : +val;
+  setByPath(c, path, val);
+  touchCandidate(c);
+  saveState();
+  updateLiveTotal();
+}
+
+function handleChange(el) {
+  const c = currentCandidate();
+  if (!c) return;
+  const path = el.dataset.path;
+  let val;
+  if (el.type === 'checkbox') val = el.checked;
+  else if (el.type === 'number') val = el.value === '' ? null : +el.value;
+  else val = el.value;
+  setByPath(c, path, val);
+  touchCandidate(c);
+  saveState();
+  render();
+}
+
+function handleMinimumChange(el) {
+  const key = el.dataset.key;
+  globalMinimums[key] = el.value === '' ? 0 : +el.value;
+  saveMinimums();
+  render();
+}
+
+function selectBand(bandKey, stateKey) {
+  return function(el) {
+    const c = currentCandidate();
+    if (!c) return;
+    const high = +el.dataset.high;
+    setByPath(c, stateKey, high);
+    if (stateKey === 'dimensionA.a1_score') c.dimensionA.a1_override = true;
+    if (stateKey === 'dimensionA.a2_score') c.dimensionA.a2_override = true;
+    touchCandidate(c);
+    saveState();
+    render();
+  };
+}
+
+function setGate(id, val) {
+  const c = currentCandidate();
+  if (!c) return;
+  c.baseline[id] = (c.baseline[id] === val ? '' : val);
+  touchCandidate(c);
+  saveState();
+  render();
+}
+
+function toggleStatus() {
+  const c = currentCandidate();
+  if (!c) return;
+  c.status = c.status === 'complete' ? 'in-progress' : 'complete';
+  touchCandidate(c);
+  saveState();
+  render();
+}
+
+function acceptSuggestion(stateKey, suggested) {
+  const c = currentCandidate();
+  setByPath(c, stateKey, suggested);
+  if (stateKey === 'dimensionA.a1_score') c.dimensionA.a1_override = false;
+  if (stateKey === 'dimensionA.a2_score') c.dimensionA.a2_override = false;
+  touchCandidate(c);
+  saveState();
+  render();
+}
+
+/* ============================================================
+ * ATTACHMENT HANDLERS
+ * ============================================================ */
+
+function triggerAttach(itemKey) {
+  pendingAttachKey = itemKey;
+  const input = document.getElementById('attachFileInput');
+  input.value = '';
+  input.click();
+}
+
+async function handleAttach(e) {
+  const files = Array.from(e.target.files || []);
+  if (!files.length || !pendingAttachKey || !currentCandidate()) {
+    pendingAttachKey = null;
+    return;
+  }
+  const candidateId = currentCandidate().id;
+  const itemKey = pendingAttachKey;
+  const tooLarge = files.find(f => f.size > 50 * 1024 * 1024);
+  if (tooLarge) {
+    if (!confirm(`"${tooLarge.name}" is ${fmtSize(tooLarge.size)}. Attach anyway? Large files may slow the tool.`)) {
+      pendingAttachKey = null;
+      e.target.value = '';
+      return;
+    }
+  }
+  try {
+    for (const f of files) {
+      const record = {
+        id: (crypto.randomUUID ? crypto.randomUUID() : 'a_' + Math.random().toString(36).slice(2,11)),
+        candidateId,
+        itemKey,
+        filename: f.name,
+        mimeType: f.type || 'application/octet-stream',
+        size: f.size,
+        uploadedAt: new Date().toISOString(),
+        notes: '',
+        blob: f
+      };
+      await idbPut(record);
+      if (!attachmentsCache[candidateId]) attachmentsCache[candidateId] = [];
+      attachmentsCache[candidateId].push(stripBlob(record));
+    }
+    expandedEvidence[itemKey] = true;
+    touchCandidate(currentCandidate());
+    saveState();
+    render();
+  } catch (err) {
+    alert('Attach failed: ' + (err && err.message ? err.message : err));
+  } finally {
+    pendingAttachKey = null;
+    e.target.value = '';
+  }
+}
+
+async function viewAttachment(id) {
+  try {
+    const rec = await idbGet(id);
+    if (!rec || !rec.blob) return alert('File not found.');
+    const url = URL.createObjectURL(rec.blob);
+    const w = window.open(url, '_blank');
+    if (!w) {
+      // popup blocked — trigger a download instead
+      const a = document.createElement('a');
+      a.href = url; a.download = rec.filename;
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+    // Revoke after a minute (gives browsers time to load); if still open, browser holds it
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (err) {
+    alert('Open failed: ' + (err && err.message ? err.message : err));
+  }
+}
+
+async function downloadAttachment(id) {
+  try {
+    const rec = await idbGet(id);
+    if (!rec || !rec.blob) return alert('File not found.');
+    const url = URL.createObjectURL(rec.blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = rec.filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (err) {
+    alert('Download failed: ' + (err && err.message ? err.message : err));
+  }
+}
+
+async function deleteAttachment(id) {
+  if (!confirm('Delete this file? This cannot be undone.')) return;
+  try {
+    await idbDelete(id);
+    const cid = currentCandidate() && currentCandidate().id;
+    if (cid && attachmentsCache[cid]) {
+      attachmentsCache[cid] = attachmentsCache[cid].filter(a => a.id !== id);
+    }
+    if (cid) { touchCandidate(currentCandidate()); saveState(); }
+    render();
+  } catch (err) {
+    alert('Delete failed: ' + (err && err.message ? err.message : err));
+  }
+}
+
+/* ============================================================
+ * EXPORT / IMPORT / PRINT
+ * ============================================================ */
+
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result.split(',')[1] || '');
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+
+function base64ToBlob(b64, mimeType) {
+  const bytes = atob(b64);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], { type: mimeType || 'application/octet-stream' });
+}
+
+async function exportJSON() {
+  // Gather all attachment records (with blobs) from IndexedDB
+  let allAtt = [];
+  try { allAtt = await idbGetAll(); } catch (e) { console.warn('Could not read attachments', e); }
+  const totalSize = allAtt.reduce((s,a) => s + (a.size||0), 0);
+
+  let includeFiles = false;
+  if (allAtt.length > 0) {
+    includeFiles = confirm(
+      `Include ${allAtt.length} attached file${allAtt.length>1?'s':''} (${fmtSize(totalSize)}) in the backup?\n\n` +
+      `Yes → full backup, larger file.\n` +
+      `No → metadata-only backup (fast, but attachments will NOT be restored on import).`
+    );
+  }
+
+  const payload = { version: 2, state, globalMinimums };
+
+  if (includeFiles) {
+    payload.attachments = [];
+    for (const rec of allAtt) {
+      try {
+        const b64 = await blobToBase64(rec.blob);
+        payload.attachments.push({
+          id: rec.id, candidateId: rec.candidateId, itemKey: rec.itemKey,
+          filename: rec.filename, mimeType: rec.mimeType, size: rec.size,
+          uploadedAt: rec.uploadedAt, notes: rec.notes || '', data: b64
+        });
+      } catch (err) { console.warn('Skip file (encode failed)', rec.filename, err); }
+    }
+  }
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `interva-coe-backup-${stamp}${includeFiles?'-full':''}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function triggerImport() { document.getElementById('importFile').click(); }
+
+async function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.state || !Array.isArray(data.state.candidates)) throw new Error('Invalid backup file');
+    const existingAtt = await idbGetAll().catch(() => []);
+    const fileCount = Array.isArray(data.attachments) ? data.attachments.length : 0;
+    const msg = fileCount
+      ? `Import ${data.state.candidates.length} candidate(s) and ${fileCount} attached file(s)?\n\nThis REPLACES all current data — ${existingAtt.length} existing attachment${existingAtt.length===1?'':'s'} will be deleted.`
+      : `Import ${data.state.candidates.length} candidate(s)?\n\nBackup contains no attachments. This REPLACES candidate records and will delete ${existingAtt.length} existing attachment${existingAtt.length===1?'':'s'} to keep data consistent.`;
+    if (!confirm(msg)) { e.target.value = ''; return; }
+
+    state = data.state;
+    if (data.globalMinimums) globalMinimums = Object.assign({}, DEFAULT_MINIMUMS, data.globalMinimums);
+    saveState(); saveMinimums();
+
+    // Wipe existing attachments; restore from backup if present
+    for (const rec of existingAtt) { try { await idbDelete(rec.id); } catch {} }
+    attachmentsCache = {};
+    if (Array.isArray(data.attachments)) {
+      for (const a of data.attachments) {
+        try {
+          const blob = base64ToBlob(a.data, a.mimeType);
+          const rec = {
+            id: a.id, candidateId: a.candidateId, itemKey: a.itemKey,
+            filename: a.filename, mimeType: a.mimeType, size: a.size,
+            uploadedAt: a.uploadedAt, notes: a.notes || '', blob
+          };
+          await idbPut(rec);
+          if (!attachmentsCache[a.candidateId]) attachmentsCache[a.candidateId] = [];
+          attachmentsCache[a.candidateId].push(stripBlob(rec));
+        } catch (err) { console.warn('Skip file (decode failed)', a.filename, err); }
+      }
+    }
+    render();
+    alert('Import complete.');
+  } catch (err) {
+    alert('Import failed: ' + err.message);
+  } finally {
+    e.target.value = '';
+  }
+}
+
+function printPage() { window.print(); }
+
+/* ============================================================
+ * RENDERING
+ * ============================================================ */
+
+function render() {
+  const app = document.getElementById('app');
+  if (currentView.name === 'dashboard') app.innerHTML = renderDashboard();
+  else if (currentView.name === 'candidate') app.innerHTML = renderCandidate();
+}
+
+function updateLiveTotal() {
+  const c = currentCandidate();
+  if (!c) return;
+  const el = document.getElementById('live-total-num');
+  if (el) el.textContent = totalScore(c);
+}
+
+/* ---------- Dashboard ---------- */
+
+function renderDashboard() {
+  const rows = state.candidates.slice().sort((a,b) => {
+    let av, bv;
+    if (sortBy.col === 'total') { av = totalScore(a); bv = totalScore(b); }
+    else if (sortBy.col === 'tier') { av = determineTier(a).key; bv = determineTier(b).key; }
+    else { av = a[sortBy.col] || ''; bv = b[sortBy.col] || ''; }
+    if (av < bv) return sortBy.dir === 'asc' ? -1 : 1;
+    if (av > bv) return sortBy.dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const sortInd = col => sortBy.col === col ? (sortBy.dir === 'asc' ? '▲' : '▼') : '↕';
+  const sortClass = col => sortBy.col === col ? 'sorted' : '';
+
+  const tableBody = rows.length === 0
+    ? `<tr class="empty"><td colspan="7">No candidates yet. Click <strong>+ New Candidate</strong> to start your first assessment.</td></tr>`
+    : rows.map(c => {
+        const total = totalScore(c);
+        const tier = determineTier(c);
+        const statusPill = c.status === 'complete' ? 'pill-complete' : 'pill-inprogress';
+        const statusLabel = c.status === 'complete' ? 'Complete' : 'In Progress';
+        const dqOverride = baselineFailed(c) ? 'pill-dq' : '';
+        return `
+          <tr onclick="location.hash='#/candidate/${esc(c.id)}'">
+            <td><strong>${esc(c.name) || '<em class="muted">(unnamed)</em>'}</strong>${c.npi ? `<div class="small muted">NPI ${esc(c.npi)}</div>` : ''}</td>
+            <td>${esc(c.reviewer) || '<span class="muted">—</span>'}</td>
+            <td class="small">${fmtDateShort(c.updatedAt)}</td>
+            <td><span class="pill ${dqOverride || statusPill}">${baselineFailed(c) ? 'Baseline DQ' : statusLabel}</span></td>
+            <td class="right tabular"><strong>${total}</strong><span class="muted"> / 100</span></td>
+            <td><span class="pill tier-${tier.key}">${esc(tier.shortLabel)}</span></td>
+            <td onclick="event.stopPropagation()"><button class="ghost danger small" onclick="deleteCandidate('${esc(c.id)}')">Delete</button></td>
+          </tr>`;
+      }).join('');
+
+  return `
+    <div class="dash-header">
+      <div>
+        <h1>Candidates</h1>
+        <div class="muted small">${state.candidates.length} total · ${state.candidates.filter(c=>c.status==='complete').length} complete</div>
+      </div>
+      <div class="dash-actions">
+        <button onclick="triggerImport()">Import backup</button>
+        <button onclick="exportJSON()" ${state.candidates.length===0?'disabled':''}>Export backup (JSON)</button>
+        <button class="primary" onclick="createCandidate()">+ New Candidate</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0; overflow:hidden">
+      <table>
+        <thead>
+          <tr>
+            <th class="${sortClass('name')}" onclick="toggleSort('name')">Name <span class="sort-ind">${sortInd('name')}</span></th>
+            <th class="${sortClass('reviewer')}" onclick="toggleSort('reviewer')">Reviewer <span class="sort-ind">${sortInd('reviewer')}</span></th>
+            <th class="${sortClass('updatedAt')}" onclick="toggleSort('updatedAt')">Last updated <span class="sort-ind">${sortInd('updatedAt')}</span></th>
+            <th class="${sortClass('status')}" onclick="toggleSort('status')">Status <span class="sort-ind">${sortInd('status')}</span></th>
+            <th class="right ${sortClass('total')}" onclick="toggleSort('total')">Total <span class="sort-ind">${sortInd('total')}</span></th>
+            <th class="${sortClass('tier')}" onclick="toggleSort('tier')">Tier <span class="sort-ind">${sortInd('tier')}</span></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${tableBody}</tbody>
+      </table>
+    </div>
+    <div class="small muted" style="margin-top:10px">
+      Data is stored locally in your browser. Use <strong>Export backup</strong> regularly — clearing browser data will erase this pipeline.
+    </div>
+  `;
+}
+
+function toggleSort(col) {
+  if (sortBy.col === col) sortBy.dir = sortBy.dir === 'asc' ? 'desc' : 'asc';
+  else { sortBy.col = col; sortBy.dir = (col === 'updatedAt' || col === 'total') ? 'desc' : 'asc'; }
+  render();
+}
+
+/* ---------- Candidate view shell ---------- */
+
+function renderCandidate() {
+  const c = currentCandidate();
+  if (!c) return renderDashboard();
+  const tab = currentView.tab;
+  const total = totalScore(c);
+  const tier = determineTier(c);
+  const dqBanner = baselineFailed(c) ? `<div class="callout danger"><strong>Baseline disqualification.</strong> One or more baseline gates is marked Fail — scoring is informational only, this candidate cannot be designated.</div>` : '';
+
+  const tabs = [
+    ['overview','Overview'],
+    ['background','Background'],
+    ['baseline','Baseline'],
+    ['a','A · Volume'],
+    ['b','B · Infrastructure'],
+    ['c','C · Quality'],
+    ['d','D · Alignment'],
+    ['summary','Summary']
+  ];
+
+  const body =
+    tab === 'overview' ? renderOverviewTab(c) :
+    tab === 'background' ? renderBackgroundTab(c) :
+    tab === 'baseline' ? renderBaselineTab(c) :
+    tab === 'a' ? renderDimATab(c) :
+    tab === 'b' ? renderDimBTab(c) :
+    tab === 'c' ? renderDimCTab(c) :
+    tab === 'd' ? renderDimDTab(c) :
+    tab === 'summary' ? renderSummaryTab(c) :
+    renderOverviewTab(c);
+
+  return `
+    <div class="no-print">
+      <div class="cand-header">
+        <div class="cand-title">
+          <a href="#/dashboard"><button class="ghost">← Dashboard</button></a>
+          <div>
+            <h1>${esc(c.name) || 'Unnamed candidate'}</h1>
+            <div class="cand-meta">
+              ${c.reviewer ? 'Reviewer: '+esc(c.reviewer)+' · ' : ''}
+              Created ${fmtDate(c.createdAt)} · Updated ${fmtDateShort(c.updatedAt)}
+            </div>
+          </div>
+        </div>
+        <div class="live-total">
+          <div>
+            <div class="live-total-wrap"><span class="total" id="live-total-num">${total}</span><span class="of"> / ${TOTAL_MAX}</span></div>
+            <div class="small muted">Live total</div>
+          </div>
+          <span class="tier-pill tier-${tier.key}">${esc(tier.shortLabel)}</span>
+        </div>
+      </div>
+      ${dqBanner}
+      <div class="tabs">
+        ${tabs.map(([k,lbl]) => `<button class="tab ${tab===k?'active':''}" onclick="setTab('${k}')">${lbl}</button>`).join('')}
+      </div>
+    </div>
+    ${body}
+  `;
+}
+
+/* ---------- Overview tab ---------- */
+
+function renderOverviewTab(c) {
+  return `
+    <div class="card">
+      <h2>Candidate details</h2>
+      <div class="row">
+        <div class="field">
+          <label>Physician name</label>
+          <input type="text" data-path="name" value="${esc(c.name)}" oninput="handleInput(this)" placeholder="First Last, MD">
+        </div>
+        <div class="field">
+          <label>NPI (optional)</label>
+          <input type="text" data-path="npi" value="${esc(c.npi)}" oninput="handleInput(this)" placeholder="10-digit NPI">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Reviewer</label>
+          <input type="text" data-path="reviewer" value="${esc(c.reviewer)}" oninput="handleInput(this)" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label>Assessment status</label>
+          <div><button onclick="toggleStatus()">${c.status === 'complete' ? '✓ Complete — click to reopen' : 'Mark as complete'}</button></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Overall notes</label>
+        <textarea data-path="overallNotes" oninput="handleInput(this)" placeholder="Running notes across the whole assessment">${esc(c.overallNotes)}</textarea>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Process overview</h2>
+      <p class="muted small">This tool tracks one candidate through the Interva CoE v3 rubric: baseline gates, four scored dimensions (A–D), and a tier determination.
+      Work the tabs in order for a new candidate, or jump directly to <strong>D · Alignment</strong> during the 30-minute structured call to score live with interview questions and anchors in view.</p>
+      <ul class="small" style="color:var(--text-soft); margin-top:8px">
+        <li><strong>Background</strong> — education, prior practice, publications, locum interest (not scored; recruiting context)</li>
+        <li><strong>Baseline</strong> — six pass/fail gates; any fail = automatic disqualification</li>
+        <li><strong>Dimension A</strong> (30 pts) — procedure volume and service-line breadth</li>
+        <li><strong>Dimension B</strong> (24 pts) — site-of-service, equipment checklist, staffing</li>
+        <li><strong>Dimension C</strong> (25 pts) — quality infrastructure, complication awareness, PRO commitment</li>
+        <li><strong>Dimension D</strong> (14 pts) — bundled-payment, patient experience, scheduling & capacity (live call)</li>
+        <li><strong>Summary</strong> — tier determination, flags, printable report</li>
+      </ul>
+    </div>
+  `;
+}
+
+/* ---------- Background tab ---------- */
+
+function interestRadio(path, current) {
+  const opts = [
+    { v:'interested',     label:'Strong interest' },
+    { v:'open',           label:'Open to hearing more' },
+    { v:'not-interested', label:'Not interested at this time' }
+  ];
+  return `
+    <div class="interest-row">
+      ${opts.map(o => `
+        <label class="interest-opt ${current===o.v?'sel':''}">
+          <input type="radio" name="${esc(path)}" ${current===o.v?'checked':''} data-path="${esc(path)}" value="${o.v}" onchange="handleChange(this)">
+          <span>${esc(o.label)}</span>
+        </label>`).join('')}
+    </div>`;
+}
+
+function renderBackgroundTab(c) {
+  const bg = c.background || {};
+  return `
+    <details class="callout">
+      <summary>Why we ask (click to expand)</summary>
+      <p>Background context shapes recruiting and fit — how long the physician has practiced, where they trained, what they've published, and whether they'd consider locum opportunities within the Interva network. This section is <strong>not scored</strong>; it informs how Interva presents opportunities and routes referrals.</p>
+    </details>
+
+    <div class="card">
+      <h2>Education & Training</h2>
+      <div class="row">
+        <div class="field">
+          <label>Medical school</label>
+          <input type="text" data-path="background.medical_school" value="${esc(bg.medical_school||'')}" oninput="handleInput(this)" placeholder="e.g., Johns Hopkins University School of Medicine">
+        </div>
+        <div class="field" style="max-width:140px">
+          <label>Graduation year</label>
+          <input type="text" data-path="background.medical_school_year" value="${esc(bg.medical_school_year||'')}" oninput="handleInput(this)" placeholder="YYYY">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Residency (Diagnostic Radiology)</label>
+          <input type="text" data-path="background.residency" value="${esc(bg.residency||'')}" oninput="handleInput(this)" placeholder="Institution">
+        </div>
+        <div class="field" style="max-width:200px">
+          <label>Residency years</label>
+          <input type="text" data-path="background.residency_year" value="${esc(bg.residency_year||'')}" oninput="handleInput(this)" placeholder="YYYY–YYYY">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>IR / VIR Fellowship</label>
+          <input type="text" data-path="background.fellowship" value="${esc(bg.fellowship||'')}" oninput="handleInput(this)" placeholder="Institution">
+        </div>
+        <div class="field" style="max-width:200px">
+          <label>Fellowship years</label>
+          <input type="text" data-path="background.fellowship_year" value="${esc(bg.fellowship_year||'')}" oninput="handleInput(this)" placeholder="YYYY–YYYY">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Practice Experience</h2>
+      <div class="row">
+        <div class="field" style="max-width:180px">
+          <label>Years in practice (post-fellowship)</label>
+          <input type="number" min="0" max="60" data-path="background.years_in_practice" value="${bg.years_in_practice==null?'':bg.years_in_practice}" oninput="handleInput(this)" placeholder="e.g., 12">
+        </div>
+        <div class="field">
+          <label>Current practice setting</label>
+          <input type="text" data-path="background.current_practice" value="${esc(bg.current_practice||'')}" oninput="handleInput(this)" placeholder="e.g., Independent OBL + hospital privileges at St. Mary's">
+        </div>
+      </div>
+      <div class="field">
+        <label>Prior practice history</label>
+        <textarea data-path="background.prior_practice" oninput="handleInput(this)" placeholder="Describe previous practices: institutions, roles, settings (OBL, ASC, hospital, academic), duration">${esc(bg.prior_practice||'')}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Publications & Academic Activity</h2>
+      <div class="row">
+        <div class="field" style="max-width:180px">
+          <label># peer-reviewed publications</label>
+          <input type="number" min="0" data-path="background.publication_count" value="${bg.publication_count==null?'':bg.publication_count}" oninput="handleInput(this)" placeholder="Approximate count">
+        </div>
+      </div>
+      <div class="field">
+        <label>Notable publications, research interests, speaking / committee roles</label>
+        <textarea data-path="background.publications_notes" oninput="handleInput(this)" placeholder="Top 2–3 publications, SIR/ACR committee roles, speaking engagements, research focus">${esc(bg.publications_notes||'')}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Selective Locum Interest</h2>
+      <div class="iq-block">
+        <h4>Teasing prompts (use during recruiting conversation)</h4>
+        <ol class="iq-list">
+          <li>Interva periodically places designated physicians in <strong>selective domestic locum engagements</strong> at partner OBLs across the US — short blocks, pre-credentialed, additional income stream. Would that be of interest to you?</li>
+          <li>Do you currently hold (or would you be open to pursuing) licensure in additional states? Which ones stand out?</li>
+          <li>Interva also places IR physicians in <strong>selective international engagements</strong> — typically at partner sites in the Middle East, Southeast Asia, or Latin America for 2–4 week blocks. Is that something you'd want to hear more about?</li>
+        </ol>
+      </div>
+
+      <div class="field">
+        <label>Interest in domestic selective locums</label>
+        ${interestRadio('background.domestic_locum_interest', bg.domestic_locum_interest||'')}
+      </div>
+      <div class="field">
+        <label>Interest in international selective locums</label>
+        ${interestRadio('background.international_locum_interest', bg.international_locum_interest||'')}
+      </div>
+      <div class="field">
+        <label>Additional state licensure (current or open to)</label>
+        <input type="text" data-path="background.additional_state_licensure" value="${esc(bg.additional_state_licensure||'')}" oninput="handleInput(this)" placeholder="e.g., CA, TX, FL (already licensed); NY, WA (would pursue)">
+      </div>
+      <div class="field">
+        <label>Locum discussion notes</label>
+        <textarea data-path="background.locum_notes" oninput="handleInput(this)" placeholder="Constraints (family, partnership), timing preferences, compensation sensitivities, regions of interest">${esc(bg.locum_notes||'')}</textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Background notes</h3>
+      <textarea data-path="background.notes" oninput="handleInput(this)" placeholder="Anything else worth capturing — hobbies/interests that came up, mutual contacts, reason for considering Interva, etc.">${esc(bg.notes||'')}</textarea>
+    </div>
+  `;
+}
+
+/* ---------- Baseline tab ---------- */
+
+const BASELINE_HINTS = {
+  g1_board_cert: 'ABMS primary-source verification PDF; CertiFacts printout',
+  g2_license: 'State medical board license query screenshots (one per state of practice)',
+  g3_exclusions: 'NPDB, OIG-LEIE, SAM.gov query result PDFs',
+  g4_malpractice: 'Certificate of insurance; signed claims-history attestation',
+  g5_practice_auth: 'State OBL license; ASC accreditation certificate; or hospital privilege letter',
+  g6_dea: 'DEA CSOS registration certificate (if sedation used)'
+};
+function baselineHint(id) { return BASELINE_HINTS[id] || ''; }
+
+function renderBaselineTab(c) {
+  const optFor = (id, cur) => ['pass','fail','unknown'].map(v =>
+    `<button class="gate-opt ${cur===v?'sel-'+v:''}" onclick="setGate('${id}','${v}')">${v==='pass'?'Pass':(v==='fail'?'Fail':'Unknown')}</button>`
+  ).join('');
+
+  return `
+    <div class="callout warning">
+      <div class="callout-title">Baseline gates are disqualifying.</div>
+      Failure on <strong>any single item</strong> disqualifies the physician immediately. Interva performs all third-party verification (NPDB, OIG-LEIE, SAM.gov, ABMS, state license). Use these fields to record verification outcomes.
+    </div>
+    <div class="card">
+      ${BASELINE_GATES.map(g => `
+        <div class="gate">
+          <div class="gate-head">
+            <div>
+              <div class="gate-title">${esc(g.title)}</div>
+              <div class="gate-desc">${esc(g.desc)}</div>
+            </div>
+            <div class="gate-options">${optFor(g.id, c.baseline[g.id])}</div>
+          </div>
+          ${evidencePanel('baseline:'+g.id, { hint: baselineHint(g.id) })}
+        </div>
+      `).join('')}
+      <div class="field" style="margin-top:12px">
+        <label>Baseline verification notes</label>
+        <textarea data-path="baseline.notes" oninput="handleInput(this)" placeholder="NPDB/OIG/SAM query dates, license numbers, any clarifications">${esc(c.baseline.notes)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Evidence panel helper (compact, baseline-only) ---------- */
+
+/* Ephemeral state: which evidence panels are expanded. Persists across re-renders
+ * within the session but not across page reloads (by design — always start collapsed). */
+let expandedEvidence = {};
+
+function toggleEvidence(itemKey) {
+  expandedEvidence[itemKey] = !expandedEvidence[itemKey];
+  render();
+}
+
+function evidencePanel(itemKey, opts) {
+  opts = opts || {};
+  const c = currentCandidate();
+  if (!c) return '';
+  const items = getAttachments(c.id, itemKey);
+  const count = items.length;
+  const isOpen = !!expandedEvidence[itemKey];
+
+  // Empty state: one tiny button that opens the file picker directly.
+  if (count === 0) {
+    return `
+      <div class="evidence-compact">
+        <button class="evidence-toggle" onclick="triggerAttach('${esc(itemKey)}')" title="${esc(opts.hint || 'Attach supporting file')}">
+          <span class="icon">📎</span><span>Attach evidence</span>
+        </button>
+      </div>`;
+  }
+
+  // With files: a count chip that toggles the list.
+  const rows = items.map(a => `
+    <div class="attachment-row">
+      <div class="attachment-info">
+        <div class="attachment-name">${esc(a.filename)}</div>
+        <div class="attachment-meta">${fmtSize(a.size)} · ${fmtDateShort(a.uploadedAt)}</div>
+      </div>
+      <div class="attachment-actions">
+        <button class="ghost" onclick="viewAttachment('${esc(a.id)}')">View</button>
+        <button class="ghost" onclick="downloadAttachment('${esc(a.id)}')">Download</button>
+        <button class="ghost danger" onclick="deleteAttachment('${esc(a.id)}')">Remove</button>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="evidence-compact">
+      <button class="evidence-toggle has-files" onclick="toggleEvidence('${esc(itemKey)}')">
+        <span class="icon">📎</span>
+        <span class="count">${count}</span>
+        <span>file${count>1?'s':''} attached</span>
+        <span class="caret">${isOpen?'▾':'▸'}</span>
+      </button>
+      ${isOpen ? `
+        <div class="evidence-list">
+          ${rows}
+          <button class="ghost add-more" onclick="triggerAttach('${esc(itemKey)}')">+ Attach more</button>
+        </div>` : ''}
+    </div>`;
+}
+
+/* ---------- Band UI helper ---------- */
+
+function bandGroupHTML(bandKey, stateKey, currentScore) {
+  const selected = bandForScore(bandKey, currentScore);
+  const selectedLo = selected ? selected.lo : null;
+  return `
+    <div class="band-group">
+      ${BANDS[bandKey].map(b => {
+        const isSelected = selected && b.lo === selectedLo;
+        const rangeLabel = b.lo === b.hi ? `${b.lo}` : `${b.lo}–${b.hi}`;
+        return `
+          <label class="band ${isSelected?'selected':''}">
+            <input type="radio" name="band_${bandKey}" ${isSelected?'checked':''}
+              data-high="${b.hi}"
+              onchange="selectBand_${bandKey}(this)">
+            <div class="band-body">
+              <span class="band-label">${rangeLabel} pts</span><span class="band-title">${esc(b.title)}</span>
+              <div class="band-anchor">${esc(b.text)}</div>
+            </div>
+          </label>`;
+      }).join('')}
+    </div>`;
+}
+
+/* Per-band onchange bridges (so the `onchange` markup stays simple). */
+function selectBand_a1(el) { selectBand('a1','dimensionA.a1_score')(el); }
+function selectBand_a2(el) { selectBand('a2','dimensionA.a2_score')(el); }
+function selectBand_b1(el) { selectBand('b1','dimensionB.b1_score')(el); }
+function selectBand_b3(el) { selectBand('b3','dimensionB.b3_score')(el); }
+function selectBand_c1(el) { selectBand('c1','dimensionC.c1_score')(el); }
+function selectBand_c3(el) { selectBand('c3','dimensionC.c3_score')(el); }
+function selectBand_d1(el) { selectBand('d1','dimensionD.d1_score')(el); }
+function selectBand_d3(el) { selectBand('d3','dimensionD.d3_score')(el); }
+function selectBand_d4(el) { selectBand('d4','dimensionD.d4_score')(el); }
+
+function refineHTML(stateKey, max, current, suggested, isOverride) {
+  const suggestDiff = suggested != null && suggested !== current;
+  return `
+    <div class="band-refine">
+      <label>Exact score:</label>
+      <input type="number" min="0" max="${max}" value="${current}" data-path="${stateKey}" onchange="handleChange(this)">
+      <span class="muted small">/ ${max}</span>
+      ${suggested != null ? `
+        <span class="suggested">
+          Auto-suggest: <strong>${suggested}</strong>
+          ${suggestDiff ? `<button class="ghost small" onclick="acceptSuggestion('${stateKey}',${suggested})" style="margin-left:6px;padding:2px 8px;font-size:11px">Apply</button>` : ''}
+          ${isOverride ? '<span class="muted"> (overridden)</span>' : ''}
+        </span>` : ''}
+    </div>`;
+}
+
+/* ---------- Dimension A ---------- */
+
+function renderDimATab(c) {
+  const s = subScores(c);
+  const agg = aggregateVolume(c);
+  const metCount = meetsMinCount(c);
+  const slCount = serviceLineCount(c);
+  const a1 = s.a1;
+  const a2 = s.a2;
+
+  const volRows = PROCEDURES.map(p => {
+    const v = c.dimensionA.volumes[p.key];
+    const m = globalMinimums[p.key] || 0;
+    const meets = m > 0 && +v >= m;
+    return `
+      <tr>
+        <td>${esc(p.name)}</td>
+        <td class="right"><input type="number" min="0" data-path="dimensionA.volumes.${p.key}" value="${v==null?'':v}" oninput="handleInput(this)" onblur="render()"></td>
+        <td class="right"><input type="number" min="0" data-key="${p.key}" value="${m||''}" onchange="handleMinimumChange(this)"></td>
+        <td class="${meets?'meets':'short'}">${m>0 ? (meets?'✓ Meets':'◯ Short') : '<span class="muted">—</span>'}</td>
+      </tr>`;
+  }).join('');
+
+  const serviceLines = (c.dimensionA && c.dimensionA.serviceLines) || {};
+  const slRows = PROCEDURES.map(p => {
+    const checked = !!serviceLines[p.key];
+    return `
+      <label class="check-item ${checked?'checked':''}">
+        <input type="checkbox" data-path="dimensionA.serviceLines.${p.key}" ${checked?'checked':''} onchange="handleChange(this)">
+        <div class="check-body">
+          <div class="check-title">${esc(p.name)}</div>
+        </div>
+      </label>`;
+  }).join('');
+
+  const a1Band = bandForScore('a1', a1);
+  const a2Band = bandForScore('a2', a2);
+
+  return `
+    <div class="dim-section">
+      <details class="callout">
+        <summary>Why this dimension (click to expand)</summary>
+        <p>Volume is the single most evidence-supported predictor of outcomes in procedural medicine. This dimension scores both <strong>depth</strong> (aggregate annual volume, A1 = 20 pts) and <strong>breadth</strong> (number of Tier 1 service lines performed, A2 = 10 pts). Both scores auto-calculate from your inputs.</p>
+      </details>
+
+      <div class="card">
+        <div class="card-header"><h2>A1 · Aggregate Tier 1 volume <span class="muted">(${a1} / ${DIM_MAX.a1})</span></h2></div>
+
+        <h3 style="margin-bottom:6px">Trailing-12-month case counts</h3>
+        <p class="small muted">Per-procedure minimums are editable (values save globally across candidates). The A1 score below auto-calculates from aggregate volume plus whether at least one procedure meets its minimum threshold.</p>
+        <table class="volume-table">
+          <thead><tr><th>Procedure</th><th class="right">Annual volume</th><th class="right">Min. threshold</th><th>Status</th></tr></thead>
+          <tbody>${volRows}</tbody>
+        </table>
+        <div class="volume-aggregate">
+          <div><div class="label">Aggregate Tier 1 volume</div><div class="value">${agg}</div></div>
+          <div><div class="label">Procedures meeting minimum</div><div class="value">${metCount} <span class="small muted">of ${PROCEDURES.length}</span></div></div>
+          ${a1 >= 5 && a1 <= 8 ? `<div class="pill tier-conditional">Emerging Practice pathway</div>` : ''}
+        </div>
+
+        <div class="spacer"></div>
+        <div class="score-readout">
+          <div><div class="score-readout-label">A1 score</div><div class="score-readout-value">${a1} <span class="small muted">/ ${DIM_MAX.a1}</span></div></div>
+          ${a1Band ? `<div class="score-readout-band"><strong>${esc(a1Band.title)}</strong><div class="small muted">${esc(a1Band.text)}</div></div>` : ''}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>A2 · Service line breadth <span class="muted">(${a2} / ${DIM_MAX.a2})</span></h2></div>
+        <p class="small muted">Check each Tier 1 service line the physician actively performs. A2 auto-calculates from the count.</p>
+        <div class="check-list">${slRows}</div>
+        <div class="spacer"></div>
+        <div class="score-readout">
+          <div><div class="score-readout-label">A2 score</div><div class="score-readout-value">${a2} <span class="small muted">/ ${DIM_MAX.a2}</span></div></div>
+          <div class="score-readout-band"><strong>${slCount} service line${slCount===1?'':'s'} captured</strong>
+            ${a2Band ? `<div class="small muted">${esc(a2Band.text)}</div>` : ''}</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Dimension A notes</h3>
+        <textarea data-path="dimensionA.notes" oninput="handleInput(this)" placeholder="Context on volume trends, ramp-up, practice history">${esc(c.dimensionA.notes)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Dimension B ---------- */
+
+function renderDimBTab(c) {
+  const s = subScores(c);
+  const b2 = b2Total(c);
+
+  const b2Html = B2_ITEMS.map(it => {
+    const checked = c.dimensionB.b2_items[it.id];
+    return `
+      <label class="check-item ${checked?'checked':''}">
+        <input type="checkbox" data-path="dimensionB.b2_items.${it.id}" ${checked?'checked':''} onchange="handleChange(this)">
+        <div class="check-body">
+          <div class="check-title">${esc(it.title)}</div>
+          <div class="check-desc">${esc(it.desc)}</div>
+        </div>
+      </label>`;
+  }).join('');
+
+  return `
+    <div class="dim-section">
+      <details class="callout">
+        <summary>Why this dimension (click to expand)</summary>
+        <p>Interva's savings model depends on site-of-service shift from hospital to OBL/ASC. This dimension evaluates operational capability: site of service (B1, 12 pts), equipment checklist (B2, 8 pts), and staffing capacity (B3, 5 pts).</p>
+      </details>
+
+      <div class="card">
+        <div class="card-header"><h2>B1 · Site-of-Service Capability <span class="muted">(${s.b1} / ${DIM_MAX.b1})</span></h2></div>
+        ${bandGroupHTML('b1','dimensionB.b1_score',s.b1)}
+        ${refineHTML('dimensionB.b1_score', DIM_MAX.b1, s.b1, null, false)}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>B2 · Equipment & Clinical Infrastructure <span class="muted">(${b2} / ${DIM_MAX.b2})</span></h2></div>
+        <p class="small muted">Each item scored present (1) or absent (0). Total capped at 7.</p>
+        <div class="check-list">${b2Html}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>B3 · Staffing & Operational Capacity <span class="muted">(${s.b3} / ${DIM_MAX.b3})</span></h2></div>
+        ${bandGroupHTML('b3','dimensionB.b3_score',s.b3)}
+        ${refineHTML('dimensionB.b3_score', DIM_MAX.b3, s.b3, null, false)}
+      </div>
+
+      <div class="card">
+        <h3>Dimension B notes</h3>
+        <textarea data-path="dimensionB.notes" oninput="handleInput(this)" placeholder="Facility details, equipment specifics, buildout timeline">${esc(c.dimensionB.notes)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Dimension C ---------- */
+
+function renderDimCTab(c) {
+  const s = subScores(c);
+  const c2 = c2Total(c);
+
+  const c2Html = C2_ITEMS.map(it => {
+    const checked = c.dimensionC.c2_items[it.id];
+    return `
+      <label class="check-item ${checked?'checked':''}">
+        <input type="checkbox" data-path="dimensionC.c2_items.${it.id}" ${checked?'checked':''} onchange="handleChange(this)">
+        <div class="check-body">
+          <div class="check-title">${esc(it.title)}<span class="check-weight">${it.weight} pt${it.weight>1?'s':''}</span></div>
+          <div class="check-desc">${esc(it.desc)}</div>
+        </div>
+      </label>`;
+  }).join('');
+
+  const sirRows = PROCEDURES.map(p => `
+    <tr><td>${esc(p.name)}</td><td class="small muted">${esc(p.compThreshold)}</td></tr>
+  `).join('');
+
+  return `
+    <div class="dim-section">
+      <details class="callout">
+        <summary>Why this dimension (click to expand)</summary>
+        <p>SIR publishes procedure-specific complication thresholds and technical success benchmarks. Most OBL-based IR physicians do not formally track against these thresholds today — that is the gap Interva fills. This dimension scores current quality infrastructure (C1), complication awareness (C2), and readiness to adopt Interva's PRO protocol (C3).</p>
+      </details>
+
+      <div class="card">
+        <div class="card-header"><h2>C1 · Quality Infrastructure & Registry <span class="muted">(${c2} / ${DIM_MAX.c2})</span></h2></div>
+        <p class="small muted">Additive. Most independent OBL operators score 0–2 today; this is expected and not disqualifying — Interva's VIRTEX enrollment support is part of post-designation onboarding.</p>
+        <div class="check-list">${c2Html}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>C2 · Complication Awareness <span class="muted">(${s.c1} / ${DIM_MAX.c1})</span></h2></div>
+        <div class="callout info">
+          <div class="callout-title">SIR Complication Classification (Grade C–F = Major)</div>
+          <strong>A</strong>: No therapy · <strong>B</strong>: Nominal therapy, incl. overnight obs · <strong>C</strong>: Minor hospitalization (&lt;48h) · <strong>D</strong>: Major therapy or extended hospitalization · <strong>E</strong>: Permanent sequelae · <strong>F</strong>: Death
+        </div>
+        <p class="small muted">Quantifying exact complication percentages is difficult without tracking infrastructure. High-performing operators typically report rates near <strong>0%</strong>. Use the SIR thresholds below as directional context during the conversation; score the physician's <em>awareness and tracking methodology</em>, not a specific number.</p>
+        <details class="callout">
+          <summary>SIR major complication thresholds by procedure (reference)</summary>
+          <table class="volume-table" style="margin-top:8px">
+            <thead><tr><th>Procedure</th><th>SIR major complication threshold</th></tr></thead>
+            <tbody>${sirRows}</tbody>
+          </table>
+        </details>
+        <div class="spacer"></div>
+        <h3 style="margin-bottom:6px">C2 score</h3>
+        ${bandGroupHTML('c1','dimensionC.c1_score',s.c1)}
+        ${refineHTML('dimensionC.c1_score', DIM_MAX.c1, s.c1, null, false)}
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>C3 · PRO Commitment <span class="muted">(${s.c3} / ${DIM_MAX.c3})</span></h2></div>
+        <details class="callout">
+          <summary>Example validated PRO instruments (click to expand)</summary>
+          <p class="small muted" style="margin-top:8px">These are examples Interva has deployed. Other validated instruments may substitute as practice patterns evolve.</p>
+          <table class="volume-table" style="margin-top:4px">
+            <thead><tr><th>Service line</th><th>Example instrument</th><th>Timepoints</th></tr></thead>
+            <tbody>
+              <tr><td>UFE (Fibroids)</td><td>UFS-QOL (37 items)</td><td>Baseline, 30d, 90d, 180d</td></tr>
+              <tr><td>PAE (BPH)</td><td>IPSS + IPSS-QOL</td><td>Baseline, 30d, 90d, 180d</td></tr>
+              <tr><td>HAE</td><td>PROMIS GI + HBS</td><td>Baseline, 30d, 90d</td></tr>
+              <tr><td>GAE (Knee osteoarthritis)</td><td>VAS + WOMAC</td><td>Baseline, 30d, 90d, 180d</td></tr>
+              <tr><td>Varicocele / Pelvic Vein</td><td>PROMIS Pain Interference SF</td><td>Baseline, 30d, 90d</td></tr>
+              <tr><td>All procedures</td><td>Interva Patient Satisfaction (NPS)</td><td>7d, 30d</td></tr>
+            </tbody>
+          </table>
+        </details>
+        ${bandGroupHTML('c3','dimensionC.c3_score',s.c3)}
+        ${refineHTML('dimensionC.c3_score', DIM_MAX.c3, s.c3, null, false)}
+      </div>
+
+      <div class="card">
+        <h3>Dimension C notes</h3>
+        <textarea data-path="dimensionC.notes" oninput="handleInput(this)" placeholder="Tracking methodology, publications, research context">${esc(c.dimensionC.notes)}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Dimension D (live call) ---------- */
+
+function renderDimDTab(c) {
+  const s = subScores(c);
+  return `
+    <div class="dim-section">
+      <div class="callout info">
+        <div class="callout-title">Live during the 30-minute structured call</div>
+        Questions, talking points, and scoring anchors are laid out in call order. Read the question · listen · click the anchor that best matches the response · type quick notes. The Interva talking points (stop-loss, concierge) are your opportunity to <strong>recruit</strong> the physician, not just evaluate them.
+      </div>
+
+      <!-- D1 -->
+      <div class="card">
+        <div class="card-header"><h2>D1 · Bundled Payment Understanding <span class="muted">(${s.d1} / ${DIM_MAX.d1})</span></h2></div>
+        <div class="iq-block">
+          <h4>Interview questions</h4>
+          <ol class="iq-list">
+            <li>Have you worked in any bundled payment, capitated, or value-based arrangement before?</li>
+            <li>Interva pays a single per-episode fee covering the procedure, facility costs, and any complication management within 30 days. How do you view that structure?</li>
+            <li>What concerns, if any, do you have about bearing episode-level risk for complications?</li>
+          </ol>
+        </div>
+        <div class="talking-point">
+          <div class="talking-point-title">Talking point · Stop-loss protection</div>
+          The bundled payment includes a defined stop-loss mechanism. Complications exceeding a per-episode cost ceiling (Exhibit A of the IR Physician Participation Agreement) are covered by Interva's stop-loss. <strong>Maximum physician financial exposure per episode is capped at the negotiated bundle price.</strong> Complications requiring inpatient transfer that generate facility charges beyond the OBL are handled through the stop-loss, not the physician's bundle.
+        </div>
+        <div class="field" style="margin-bottom:6px">
+          <label><input type="checkbox" data-path="dimensionD.d1_prior_vbc" ${c.dimensionD.d1_prior_vbc?'checked':''} onchange="handleChange(this)" style="width:auto;margin-right:6px"> Has prior bundled / capitated / VBC experience</label>
+        </div>
+        ${bandGroupHTML('d1','dimensionD.d1_score',s.d1)}
+        ${refineHTML('dimensionD.d1_score', DIM_MAX.d1, s.d1, null, false)}
+        <div class="field" style="margin-top:10px">
+          <label>D1 notes</label>
+          <textarea data-path="dimensionD.d1_notes" oninput="handleInput(this)" placeholder="Quotes, concerns, specific responses">${esc(c.dimensionD.d1_notes)}</textarea>
+        </div>
+      </div>
+
+      <!-- D3 (renumbered to D2 in display) -->
+      <div class="card">
+        <div class="card-header"><h2>D2 · Patient Experience Orientation <span class="muted">(${s.d3} / ${DIM_MAX.d3})</span></h2></div>
+        <div class="iq-block">
+          <h4>Interview questions</h4>
+          <ol class="iq-list">
+            <li>Walk me through the patient journey when someone is referred for a UFE/PAE/PAD procedure. What does pre-procedure counseling look like?</li>
+            <li>What does post-procedure follow-up look like? When do you next contact the patient after discharge?</li>
+            <li>Do you have any patient testimonials, reviews, or informal feedback you'd be willing to share?</li>
+            <li>Interva provides a concierge patient experience layer. How does that fit with your current workflow?</li>
+          </ol>
+        </div>
+        <div class="talking-point">
+          <div class="talking-point-title">Talking point · Concierge integration</div>
+          Interva's concierge team administers the patient experience survey (7d + 30d) via text/email — the physician's office is <strong>not burdened</strong> with survey administration. PRO collection uses tablet, paper, or EHR integration (Epic / athenahealth / eCW); the physician picks the method that fits their workflow.
+        </div>
+        ${bandGroupHTML('d3','dimensionD.d3_score',s.d3)}
+        ${refineHTML('dimensionD.d3_score', DIM_MAX.d3, s.d3, null, false)}
+        <div class="field" style="margin-top:10px">
+          <label>D2 notes</label>
+          <textarea data-path="dimensionD.d3_notes" oninput="handleInput(this)" placeholder="Journey details, testimonial examples, concierge reception">${esc(c.dimensionD.d3_notes)}</textarea>
+        </div>
+      </div>
+
+      <!-- D4 (renumbered to D3 in display) -->
+      <div class="card">
+        <div class="card-header"><h2>D3 · Scheduling & Capacity <span class="muted">(${s.d4} / ${DIM_MAX.d4})</span></h2></div>
+        <div class="iq-block">
+          <h4>Interview questions</h4>
+          <ol class="iq-list">
+            <li>What's your typical turnaround time from referral to scheduled consult?</li>
+            <li>From consult to procedure, what's your typical wait time?</li>
+            <li>How many additional Interva cases per month could you take on in the next 90 days without disrupting current operations?</li>
+            <li>If volume grows beyond that, what levers (staffing, block time, additional day per week) could you pull to scale?</li>
+          </ol>
+        </div>
+        <div class="talking-point">
+          <div class="talking-point-title">Context · Why this matters</div>
+          Interva commits a defined <strong>referral volume</strong> to designated physicians. Both scheduling responsiveness (time-to-consult, time-to-procedure) and <strong>absolute capacity</strong> (cases per month you can absorb) matter — a fast scheduler at full capacity is less useful to the network than a moderate scheduler with real headroom.
+        </div>
+        ${bandGroupHTML('d4','dimensionD.d4_score',s.d4)}
+        ${refineHTML('dimensionD.d4_score', DIM_MAX.d4, s.d4, null, false)}
+        <div class="field" style="margin-top:10px">
+          <label>D3 notes</label>
+          <textarea data-path="dimensionD.d4_notes" oninput="handleInput(this)" placeholder="Scheduling windows, current capacity, ramp levers">${esc(c.dimensionD.d4_notes)}</textarea>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Summary ---------- */
+
+function renderSummaryTab(c) {
+  const s = subScores(c);
+  const dims = dimensionTotals(c);
+  const total = totalScore(c);
+  const tier = determineTier(c);
+
+  const flags = [];
+  if (baselineFailed(c)) flags.push({ cls:'red', text:'Baseline disqualification — one or more pass/fail gates failed.' });
+  const baselineUnknowns = ['g1_board_cert','g2_license','g3_exclusions','g4_malpractice','g5_practice_auth','g6_dea']
+    .filter(k => !c.baseline[k] || c.baseline[k] === 'unknown');
+  if (baselineUnknowns.length && !baselineFailed(c)) flags.push({ cls:'amber', text:`${baselineUnknowns.length} baseline gate${baselineUnknowns.length>1?'s':''} not yet verified.` });
+  if (dimFloorFail(c)) flags.push({ cls:'red', text:'Dimension floor violation — one or more dimensions below 40% of max.' });
+  if (tier.key === 'tier1' && !dimPremierFail(c)) flags.push({ cls:'green', text:'Premier CoE: score ≥85 and no dimension below 50%.' });
+  if (tier.key === 'conditional') flags.push({ cls:'amber', text:'Emerging Practice candidate: A1 in 5–8 band with strong B/C/D. Consider Conditional Designation with defined milestones.' });
+  if (tier.key === 'borderline') flags.push({ cls:'amber', text:'Borderline score (55–64%). Manual review — not automatically designated.' });
+
+  const dimBar = (key, label, val, max) => {
+    const pct = max ? (val / max) * 100 : 0;
+    const fillCls = pct < 40 ? 'fail' : pct < 50 ? 'low' : 'ok';
+    return `
+      <div class="dim-bar">
+        <div class="name">${label}</div>
+        <div class="track"><div class="fill ${fillCls}" style="width:${pct.toFixed(1)}%"></div><div class="threshold" title="40% floor"></div></div>
+        <div class="val">${val} / ${max} (${pct.toFixed(0)}%)</div>
+      </div>`;
+  };
+
+  return `
+    <div class="dim-section">
+      <div class="card">
+        <div class="card-header no-print"><h2>Assessment summary</h2>
+          <div style="display:flex;gap:8px">
+            <button onclick="printPage()">Print / Save as PDF</button>
+            <button class="primary" onclick="toggleStatus()">${c.status==='complete'?'Reopen':'Mark complete'}</button>
+          </div>
+        </div>
+        <div class="summary-total">
+          <div><span class="score">${total}</span><span class="of100"> / ${TOTAL_MAX}</span></div>
+          <div class="tier-badge tier-${tier.key}">${esc(tier.label)}</div>
+        </div>
+        <div class="dim-bars">
+          ${dimBar('A','A · Volume & Case Mix',dims.A,DIM_GROUP_MAX.A)}
+          ${dimBar('B','B · Infrastructure',dims.B,DIM_GROUP_MAX.B)}
+          ${dimBar('C','C · Quality & Outcomes',dims.C,DIM_GROUP_MAX.C)}
+          ${dimBar('D','D · Alignment',dims.D,DIM_GROUP_MAX.D)}
+        </div>
+      </div>
+
+      ${flags.length ? `
+      <div class="card">
+        <h3>Flags</h3>
+        <div class="flags">${flags.map(f => `<div class="flag ${f.cls}">${esc(f.text)}</div>`).join('')}</div>
+      </div>` : ''}
+
+      <div class="card">
+        <h3>Sub-score breakdown</h3>
+        <table class="breakdown">
+          <thead><tr><th>Item</th><th class="right">Score</th><th class="right">Max</th><th class="right">%</th></tr></thead>
+          <tbody>
+            <tr><td>A1 · Aggregate volume</td><td class="num">${s.a1}</td><td class="num">${DIM_MAX.a1}</td><td class="num">${(s.a1/DIM_MAX.a1*100).toFixed(0)}%</td></tr>
+            <tr><td>A2 · Service line breadth</td><td class="num">${s.a2}</td><td class="num">${DIM_MAX.a2}</td><td class="num">${(s.a2/DIM_MAX.a2*100).toFixed(0)}%</td></tr>
+            <tr><td>B1 · Site of service</td><td class="num">${s.b1}</td><td class="num">${DIM_MAX.b1}</td><td class="num">${(s.b1/DIM_MAX.b1*100).toFixed(0)}%</td></tr>
+            <tr><td>B2 · Equipment & infrastructure</td><td class="num">${s.b2}</td><td class="num">${DIM_MAX.b2}</td><td class="num">${(s.b2/DIM_MAX.b2*100).toFixed(0)}%</td></tr>
+            <tr><td>B3 · Staffing</td><td class="num">${s.b3}</td><td class="num">${DIM_MAX.b3}</td><td class="num">${(s.b3/DIM_MAX.b3*100).toFixed(0)}%</td></tr>
+            <tr><td>C1 · Quality infrastructure</td><td class="num">${s.c2}</td><td class="num">${DIM_MAX.c2}</td><td class="num">${(s.c2/DIM_MAX.c2*100).toFixed(0)}%</td></tr>
+            <tr><td>C2 · Complication awareness</td><td class="num">${s.c1}</td><td class="num">${DIM_MAX.c1}</td><td class="num">${(s.c1/DIM_MAX.c1*100).toFixed(0)}%</td></tr>
+            <tr><td>C3 · PRO commitment</td><td class="num">${s.c3}</td><td class="num">${DIM_MAX.c3}</td><td class="num">${(s.c3/DIM_MAX.c3*100).toFixed(0)}%</td></tr>
+            <tr><td>D1 · Bundled payment</td><td class="num">${s.d1}</td><td class="num">${DIM_MAX.d1}</td><td class="num">${(s.d1/DIM_MAX.d1*100).toFixed(0)}%</td></tr>
+            <tr><td>D2 · Patient experience</td><td class="num">${s.d3}</td><td class="num">${DIM_MAX.d3}</td><td class="num">${(s.d3/DIM_MAX.d3*100).toFixed(0)}%</td></tr>
+            <tr><td>D3 · Scheduling & capacity</td><td class="num">${s.d4}</td><td class="num">${DIM_MAX.d4}</td><td class="num">${(s.d4/DIM_MAX.d4*100).toFixed(0)}%</td></tr>
+            <tr style="background:var(--surface-alt)"><td><strong>Total</strong></td><td class="num"><strong>${total}</strong></td><td class="num"><strong>${TOTAL_MAX}</strong></td><td class="num"><strong>${(total/TOTAL_MAX*100).toFixed(0)}%</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      ${backgroundSummary(c)}
+
+      ${c.overallNotes || c.dimensionA.notes || c.dimensionB.notes || c.dimensionC.notes || c.baseline.notes ? `
+      <div class="card">
+        <h3>Notes</h3>
+        ${c.overallNotes ? `<h4>Overall</h4><p>${esc(c.overallNotes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.baseline.notes ? `<h4>Baseline verification</h4><p>${esc(c.baseline.notes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.dimensionA.notes ? `<h4>Dimension A</h4><p>${esc(c.dimensionA.notes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.dimensionB.notes ? `<h4>Dimension B</h4><p>${esc(c.dimensionB.notes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.dimensionC.notes ? `<h4>Dimension C</h4><p>${esc(c.dimensionC.notes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.dimensionD.d1_notes ? `<h4>D1 — Bundled payment</h4><p>${esc(c.dimensionD.d1_notes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.dimensionD.d3_notes ? `<h4>D2 — Patient experience</h4><p>${esc(c.dimensionD.d3_notes).replace(/\n/g,'<br>')}</p>` : ''}
+        ${c.dimensionD.d4_notes ? `<h4>D3 — Scheduling & capacity</h4><p>${esc(c.dimensionD.d4_notes).replace(/\n/g,'<br>')}</p>` : ''}
+      </div>` : ''}
+    </div>
+  `;
+}
+
+function backgroundSummary(c) {
+  const bg = c.background || {};
+  const interestLabel = v => v === 'interested' ? 'Strong interest'
+    : v === 'open' ? 'Open to hearing more'
+    : v === 'not-interested' ? 'Not interested at this time' : '—';
+  const hasAny = bg.medical_school || bg.residency || bg.fellowship ||
+    bg.years_in_practice != null || bg.prior_practice || bg.current_practice ||
+    bg.publication_count != null || bg.publications_notes ||
+    bg.domestic_locum_interest || bg.international_locum_interest ||
+    bg.additional_state_licensure || bg.locum_notes || bg.notes;
+  if (!hasAny) return '';
+  const rows = [];
+  if (bg.years_in_practice != null) rows.push(['Years in practice', esc(bg.years_in_practice)]);
+  if (bg.medical_school) rows.push(['Medical school', esc(bg.medical_school) + (bg.medical_school_year ? ' ('+esc(bg.medical_school_year)+')' : '')]);
+  if (bg.residency) rows.push(['Residency', esc(bg.residency) + (bg.residency_year ? ' ('+esc(bg.residency_year)+')' : '')]);
+  if (bg.fellowship) rows.push(['Fellowship', esc(bg.fellowship) + (bg.fellowship_year ? ' ('+esc(bg.fellowship_year)+')' : '')]);
+  if (bg.current_practice) rows.push(['Current practice', esc(bg.current_practice)]);
+  if (bg.publication_count != null) rows.push(['Peer-reviewed pubs', esc(bg.publication_count)]);
+  if (bg.domestic_locum_interest) rows.push(['Domestic locum', esc(interestLabel(bg.domestic_locum_interest))]);
+  if (bg.international_locum_interest) rows.push(['International locum', esc(interestLabel(bg.international_locum_interest))]);
+  if (bg.additional_state_licensure) rows.push(['Additional licensure', esc(bg.additional_state_licensure)]);
+  const blocks = [];
+  if (bg.prior_practice) blocks.push(['Prior practice', esc(bg.prior_practice).replace(/\n/g,'<br>')]);
+  if (bg.publications_notes) blocks.push(['Publications / academic', esc(bg.publications_notes).replace(/\n/g,'<br>')]);
+  if (bg.locum_notes) blocks.push(['Locum notes', esc(bg.locum_notes).replace(/\n/g,'<br>')]);
+  if (bg.notes) blocks.push(['Other notes', esc(bg.notes).replace(/\n/g,'<br>')]);
+  return `
+    <div class="card">
+      <h3>Background</h3>
+      ${rows.length ? `
+        <table class="breakdown">
+          <tbody>${rows.map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')}</tbody>
+        </table>` : ''}
+      ${blocks.map(([k,v]) => `<h4 style="margin-top:10px">${k}</h4><p>${v}</p>`).join('')}
+    </div>`;
+}
+
+/* ============================================================
+ * INIT
+ * ============================================================ */
+
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>

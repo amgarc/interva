@@ -1,0 +1,12 @@
+{
+  "name": "interva-coe-rubric",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Interva CoE Physician Selection Rubric — standalone browser tool + v4 document generator",
+  "scripts": {
+    "build-doc": "node build_v4.js"
+  },
+  "dependencies": {
+    "docx": "^9.6.1"
+  }
+}
