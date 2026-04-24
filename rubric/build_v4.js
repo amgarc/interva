@@ -245,7 +245,7 @@ content.push(
       ['B. Facility Infrastructure & Operational Readiness', '24', 'Site-of-service capability, equipment checklist, staffing & scheduling'],
       ['C. Clinical Quality & Outcomes Orientation', '25', 'Quality infrastructure & registry participation, complication awareness, PRO commitment'],
       ['D. Model Alignment & Patient Experience', '14', 'Bundled payment understanding, patient experience orientation, scheduling & capacity'],
-      [{ children: [P([Bold('Total')])] }, { children: [P([Bold('93')])] }, ''],
+      [P([Bold('Total')]), P([Bold('93')]), ''],
     ]
   ),
   Spacer(),
