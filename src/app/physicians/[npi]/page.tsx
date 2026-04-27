@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPhysicianByNpi } from "@/lib/physicians";
+import { SourcedValue, factsToProvenance, syntheticProvenance } from "@/components/sourced-value";
+import { setStage, STAGES, STAGE_DISPLAY } from "@/lib/outreach";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +27,24 @@ export default async function PhysicianDetailPage({
     .filter(Boolean)
     .join(" ");
 
+  const nppesProvenance = syntheticProvenance(
+    "NPPES",
+    "NPPES (NPI Registry bulk file)",
+    p.lastUpdatedDate ?? p.updatedAt,
+    0.95,
+  );
+
+  // Server action: stage transition.
+  async function changeStage(formData: FormData) {
+    "use server";
+    const stage = formData.get("stage") as string;
+    const notes = (formData.get("notes") as string) || undefined;
+    if (!STAGES.includes(stage as (typeof STAGES)[number])) return;
+    await setStage(p!.npi, stage as (typeof STAGES)[number], undefined, notes);
+    revalidatePath(`/physicians/${p!.npi}`);
+    revalidatePath(`/outreach`);
+  }
+
   return (
     <div className="max-w-4xl">
       <Link href="/" className="text-sm opacity-70 hover:opacity-100">
@@ -32,8 +53,10 @@ export default async function PhysicianDetailPage({
 
       <div className="mt-2 flex items-start justify-between gap-4">
         <h1 className="text-2xl font-semibold">
-          {fullName}
-          {p.credentials && <span className="opacity-60 font-normal">, {p.credentials}</span>}
+          <SourcedValue facts={[nppesProvenance]}>
+            {fullName}
+            {p.credentials && <span className="opacity-60 font-normal">, {p.credentials}</span>}
+          </SourcedValue>
         </h1>
         <div className="flex gap-2 flex-wrap justify-end">
           {p.isActiveIr && (
@@ -74,6 +97,122 @@ export default async function PhysicianDetailPage({
           )}
         </div>
       </div>
+
+      {p.persona && (
+        <Section title={`Outreach persona — ${p.persona.archetype}`}>
+          <p className="text-sm leading-relaxed">{p.persona.hookSummary}</p>
+          <div className="mt-2 text-xs opacity-60">
+            Confidence: {(p.persona.archetypeConfidence * 100).toFixed(0)}% · Computed{" "}
+            {p.persona.computedAt.toISOString().slice(0, 10)}
+            {p.persona.disqualifiers.length > 0 && (
+              <> · Disqualifiers: {p.persona.disqualifiers.join(", ")}</>
+            )}
+          </div>
+        </Section>
+      )}
+
+      {/* Outreach stage controls */}
+      <Section title={`Outreach stage — ${p.outreach?.stage ?? "untouched"}`}>
+        <form action={changeStage} className="flex gap-2 items-end flex-wrap">
+          <label className="flex flex-col text-sm">
+            <span className="opacity-70 mb-1">Move to</span>
+            <select
+              name="stage"
+              defaultValue={p.outreach?.stage ?? "enriched"}
+              className="border border-black/15 dark:border-white/15 rounded px-3 py-1.5 bg-transparent"
+            >
+              {STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {STAGE_DISPLAY[s]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col text-sm flex-1 min-w-[200px]">
+            <span className="opacity-70 mb-1">Note (optional)</span>
+            <input
+              name="notes"
+              defaultValue={p.outreach?.notes ?? ""}
+              className="border border-black/15 dark:border-white/15 rounded px-3 py-1.5 bg-transparent"
+            />
+          </label>
+          <button
+            type="submit"
+            className="px-4 py-1.5 text-sm border border-black/20 dark:border-white/20 rounded bg-black text-white dark:bg-white dark:text-black font-medium"
+          >
+            Update
+          </button>
+        </form>
+        {p.outreach?.lastTouchAt && (
+          <p className="text-xs opacity-60 mt-2">
+            Last touched {p.outreach.lastTouchAt.toISOString().slice(0, 10)}
+          </p>
+        )}
+      </Section>
+
+      {p.channels.length > 0 && (
+        <Section title={`Outreach channels (${p.channels.length})`}>
+          <table className="w-full text-sm">
+            <thead className="text-left opacity-70">
+              <tr>
+                <th className="py-1 pr-3">Kind</th>
+                <th className="py-1 pr-3">Value</th>
+                <th className="py-1 pr-3">Verified</th>
+                <th className="py-1">Source</th>
+              </tr>
+            </thead>
+            <tbody>
+              {p.channels.map((c) => {
+                const provenance = c.sourceFact
+                  ? factsToProvenance([
+                      {
+                        sourceKey: c.sourceFact.sourceKey,
+                        source: c.sourceFact.source,
+                        sourceUrl: c.sourceFact.sourceUrl,
+                        fetchedAt: c.sourceFact.fetchedAt,
+                        confidence: c.sourceFact.confidence,
+                      },
+                    ])
+                  : [];
+                return (
+                  <tr key={c.id} className="border-t border-black/5 dark:border-white/5">
+                    <td className="py-1 pr-3 text-xs uppercase opacity-70">{c.kind}</td>
+                    <td className="py-1 pr-3 font-mono text-xs">
+                      {provenance.length > 0 ? (
+                        <SourcedValue facts={provenance}>{c.value}</SourcedValue>
+                      ) : (
+                        c.value
+                      )}
+                    </td>
+                    <td className="py-1 pr-3 text-xs">
+                      {c.verified ? <span className="text-emerald-600 dark:text-emerald-400">✓ {c.verifyMethod}</span> : <span className="opacity-50">—</span>}
+                    </td>
+                    <td className="py-1 text-xs opacity-70">{c.verifyMethod ?? c.sourceFact?.source.displayName ?? "—"}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Section>
+      )}
+
+      {p.signals.length > 0 && (
+        <Section title={`Outreach signals (${p.signals.length})`}>
+          <ul className="space-y-1.5 text-sm">
+            {p.signals.map((s) => (
+              <li key={s.id.toString()} className="flex gap-3 items-baseline">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 font-mono whitespace-nowrap">
+                  {s.kind}
+                </span>
+                <span className="opacity-60 text-xs whitespace-nowrap">
+                  {s.occurredAt.toISOString().slice(0, 10)}
+                </span>
+                <span>{s.summary}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
 
       <dl className="mt-4 grid grid-cols-[160px_1fr] gap-y-1 text-sm">
         <dt className="opacity-60">NPI</dt>

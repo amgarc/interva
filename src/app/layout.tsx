@@ -16,7 +16,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/" className="font-semibold">
               Interva
             </Link>
-            <span className="text-sm opacity-60">IR Physician Funnel</span>
+            <nav className="flex gap-4 text-sm">
+              <Link href="/" className="opacity-70 hover:opacity-100">
+                Directory
+              </Link>
+              <Link href="/outreach" className="opacity-70 hover:opacity-100">
+                Outreach
+              </Link>
+            </nav>
+            <span className="text-sm opacity-60 ml-auto">IR Physician Funnel</span>
           </div>
         </header>
         <main className="max-w-7xl mx-auto px-6 py-6">{children}</main>

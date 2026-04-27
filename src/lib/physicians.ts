@@ -144,6 +144,16 @@ export async function getPhysicianByNpi(npi: string) {
         include: { facility: true },
         orderBy: [{ facility: { kind: "asc" } }, { facility: { name: "asc" } }],
       },
+      facts: {
+        where: { supersededById: null },
+        include: { source: true },
+        orderBy: { fetchedAt: "desc" },
+      },
+      signals: { orderBy: { occurredAt: "desc" }, take: 20 },
+      channels: { include: { sourceFact: { include: { source: true } } } },
+      persona: true,
+      outreach: true,
+      actions: { orderBy: { occurredAt: "desc" }, take: 20 },
     },
   });
 }

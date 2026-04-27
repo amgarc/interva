@@ -56,6 +56,12 @@ model Physician {
   addresses        PhysicianAddress[]
   procedures       ProcedureVolume[]
   affiliations     PhysicianAffiliation[]
+  facts            Fact[]
+  signals          OutreachSignal[]
+  channels         ContactChannel[]
+  persona          OutreachPersona?
+  outreach         OutreachStage?
+  actions          OutreachAction[]
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -110,6 +116,177 @@ model PhysicianAddress {
   @@index([npi, kind])
   @@index([state, city])
   @@index([cbsaCode])
+}
+
+// ============================================================
+// ENRICHMENT LAYER — source-attributed facts + outreach context
+// ============================================================
+
+// --- Registry of every data source that produces Facts. Acts as the
+//     authority for source display name, freshness rules, and base
+//     confidence. Worker scripts upsert their own row.
+model Source {
+  key            String   @id      // e.g. "PRACTICE_WEBSITE_SCRAPE"
+  displayName    String            // "Practice website (auto-scraped)"
+  category       String            // "verified" | "inferred" | "scraped" | "user_entered" | "derived"
+  baseConfidence Float             // 0..1 default
+  freshnessHours Int      @default(720)  // re-fetch if older than this
+  lastRunAt      DateTime?
+  lastSuccessAt  DateTime?
+  notes          String?
+
+  facts          Fact[]
+}
+
+// --- Append-only fact: every enrichment value carries provenance.
+//     Multiple Facts can exist per (npi, fieldPath); UI/queries pick the
+//     "winning" one via confidence + recency.
+model Fact {
+  id          BigInt   @id @default(autoincrement())
+  npi         String
+  physician   Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  fieldPath   String   // dotted: "contact.email_direct" | "ownership.is_partner" | "academic.h_index" | "signal.recent_publication"
+  value       Json     // typed by fieldPath consumer
+  valueText   String?  // searchable lowercase render of value (when string-like)
+
+  sourceKey   String
+  source      Source   @relation(fields: [sourceKey], references: [key], onDelete: Cascade)
+  sourceUrl   String?  // permalink to evidence page
+
+  fetchedAt   DateTime @default(now())
+  validUntil  DateTime?
+  confidence  Float    // 0..1
+  supersededById BigInt?
+
+  signals     OutreachSignal[]
+  channels    ContactChannel[]
+
+  @@index([npi, fieldPath])
+  @@index([fieldPath])
+  @@index([sourceKey])
+  @@index([fetchedAt])
+}
+
+// --- Append-only timestamped events used for "why now" outreach context.
+//     Derived from Facts (a published-paper Fact spawns a PUBLISHED_PAPER signal).
+model OutreachSignal {
+  id           BigInt   @id @default(autoincrement())
+  npi          String
+  physician    Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  kind         String   // "PUBLISHED_PAPER" | "CONFERENCE_SPEAKER" | "WON_AWARD" | "OPENED_NEW_OBL" | "JOB_POSTED" | "VENDOR_CASE_FEATURED" | "OIG_EXCLUDED" | "ACTIVE_TRIAL_INVESTIGATOR"
+  occurredAt   DateTime
+  summary      String   // one-line human description
+  payload      Json?
+  expiresAt    DateTime?
+
+  sourceFactId BigInt?
+  sourceFact   Fact?    @relation(fields: [sourceFactId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
+
+  @@index([npi, occurredAt(sort: Desc)])
+  @@index([kind, occurredAt(sort: Desc)])
+}
+
+// --- Verified channels for outbound outreach. Always source-attributed.
+model ContactChannel {
+  id           Int      @id @default(autoincrement())
+  npi          String
+  physician    Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  kind         String   // "email_direct" | "email_practice" | "phone_direct" | "phone_practice" | "linkedin" | "twitter" | "mailing"
+  value        String
+  isPreferred  Boolean  @default(false)
+  verified     Boolean  @default(false)
+  verifiedAt   DateTime?
+  verifyMethod String?  // "smtp_probe" | "manual" | "domain_match"
+
+  sourceFactId BigInt?
+  sourceFact   Fact?    @relation(fields: [sourceFactId], references: [id], onDelete: SetNull)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([npi, kind, value])
+  @@index([npi, kind])
+}
+
+// --- Computed outreach archetype + GTM hook line. Refreshed by
+//     scripts/derive-persona.ts after enricher runs.
+model OutreachPersona {
+  npi              String   @id
+  physician        Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  archetype        String   // "OBL_PARTNER_OWNER" | "ASC_PARTNER" | "ASC_EMPLOYEE" | "HOSPITAL_EMPLOYED" | "ACADEMIC_FACULTY" | "PE_OWNED" | "RETIRING" | "UNKNOWN"
+  archetypeConfidence Float
+  hookSummary      String   // 1-3 sentence Interva-tailored hook
+  qualifyingFactIds BigInt[] @default([])
+  disqualifiers    String[] @default([])
+
+  computedAt       DateTime @default(now())
+
+  @@index([archetype])
+}
+
+// --- Funnel state machine. One row per physician once they enter the funnel.
+model OutreachStage {
+  npi          String   @id
+  physician    Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  stage        String   // "untouched" | "enriched" | "qualified" | "queued" | "contacted" | "engaged" | "meeting" | "won" | "lost" | "dnq"
+  ownerId      String?
+  enteredAt    DateTime @default(now())
+  lastTouchAt  DateTime?
+  nextActionAt DateTime?
+  notes        String?
+
+  @@index([stage, lastTouchAt])
+  @@index([ownerId])
+}
+
+// --- Append-only outreach action log (sent emails, calls, meetings, etc).
+//     Foreign tools (Smartlead/Apollo/Gmail) write back via webhook.
+model OutreachAction {
+  id          BigInt   @id @default(autoincrement())
+  npi         String
+  physician   Physician @relation(fields: [npi], references: [npi], onDelete: Cascade)
+
+  channel     String   // "email" | "linkedin" | "call" | "voicemail" | "event" | "note"
+  direction   String   // "outbound" | "inbound"
+  status      String?  // "sent" | "delivered" | "opened" | "clicked" | "replied" | "bounced" | "failed"
+  templateId  String?
+  campaignId  String?
+  subject     String?
+  body        String?
+  externalId  String?  // Smartlead/Apollo/Gmail message ID
+  payload     Json?
+
+  occurredAt  DateTime @default(now())
+  ownerId     String?
+
+  @@index([npi, occurredAt(sort: Desc)])
+  @@index([campaignId, occurredAt(sort: Desc)])
+}
+
+// --- Trigger-condition-action rules evaluated by scripts/automation:run.
+//     Keeps automation pluggable without code changes.
+model AutomationRule {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  enabled     Boolean  @default(true)
+
+  trigger     Json     // { type: "FACT_ADDED", fieldPath: "academic.recent_publication" } | { type: "STAGE_CHANGED", to: "qualified" } | { type: "SIGNAL_ADDED", kind: "..." } | { type: "CRON", spec: "..." }
+  condition   Json     // boolean expression over physician + facts + signals (small DSL)
+  action      Json     // { type: "WEBHOOK", url, headers? } | { type: "SET_STAGE", stage } | { type: "ADD_TAG", tag } | { type: "ENROLL_CAMPAIGN", id }
+
+  lastFiredAt DateTime?
+  fireCount   Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // --- CMS-tracked facility (hospital, ASC, etc.) keyed by CCN.

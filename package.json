@@ -17,7 +17,15 @@
     "derive:practice-setting": "tsx scripts/derive-practice-setting.ts",
     "backfill:metros": "tsx scripts/backfill-metros.ts",
     "ingest:facilities": "tsx scripts/ingest-facilities.ts",
-    "ingest:affiliations": "tsx scripts/ingest-affiliations.ts"
+    "ingest:affiliations": "tsx scripts/ingest-affiliations.ts",
+    "seed:sources": "tsx scripts/seed-sources.ts",
+    "enrich:oig": "tsx scripts/enrichers/oig-exclusion.ts",
+    "enrich:npi-registry": "tsx scripts/enrichers/npi-registry-detail.ts",
+    "enrich:pubmed": "tsx scripts/enrichers/pubmed.ts",
+    "enrich:clinicaltrials": "tsx scripts/enrichers/clinicaltrials.ts",
+    "enrich:practice-website": "tsx scripts/enrichers/practice-website.ts",
+    "derive:persona": "tsx scripts/derive-persona.ts",
+    "automation:run": "tsx scripts/automation-run.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
