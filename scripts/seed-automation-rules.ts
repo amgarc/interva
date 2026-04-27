@@ -7,25 +7,11 @@ const prisma = new PrismaClient();
 
 const RULES = [
   {
-    name: "Active OBL/ASC IR with verified email → mark qualified",
-    description:
-      "Once enrichment surfaces a verified practice email AND we have an Interva persona for an active OBL/ASC IR, advance them to 'qualified'.",
-    trigger: { type: "FACT_ADDED", fieldPath: "contact.email_practice" },
-    condition: {
-      all: [
-        { field: "physician.isActiveIr", op: "eq", value: true },
-        { field: "persona.archetype", op: "in", value: ["OBL_PARTNER_OWNER", "ASC_PARTNER", "OBL_PRACTITIONER", "ASC_HYBRID"] },
-        { field: "channel.email_practice", op: "exists" },
-      ],
-    },
-    action: { type: "SET_STAGE", stage: "qualified" },
-  },
-  {
-    name: "OIG-excluded → set DNQ",
+    name: "OIG-excluded → set no_go",
     description: "Disqualify any physician on the OIG exclusion list.",
     trigger: { type: "FACT_ADDED", fieldPath: "compliance.oig_excluded" },
     condition: { field: "fact.compliance.oig_excluded", op: "exists" },
-    action: { type: "SET_STAGE", stage: "dnq" },
+    action: { type: "SET_STAGE", stage: "no_go" },
   },
   {
     name: "Recent paper → webhook trigger (warm-up campaign)",

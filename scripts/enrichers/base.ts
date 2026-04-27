@@ -181,7 +181,7 @@ export async function markSourceRunSuccess(prisma: PrismaClient, sourceKey: stri
   });
 }
 
-// Default cohort selector: active OBL/ASC IRs (Interva's primary commercial TAM).
+// Default cohort: active OBL/ASC IRs (Interva's primary commercial TAM).
 export async function getOblAscActiveCohort(prisma: PrismaClient): Promise<string[]> {
   const rows = await prisma.physician.findMany({
     where: {
@@ -191,6 +191,21 @@ export async function getOblAscActiveCohort(prisma: PrismaClient): Promise<strin
     select: { npi: true },
   });
   return rows.map((r) => r.npi);
+}
+
+// Wider cohort: every IR physician we have. Activated via COHORT=all env var.
+export async function getAllIrCohort(prisma: PrismaClient): Promise<string[]> {
+  const rows = await prisma.physician.findMany({
+    where: { deactivationDate: null },
+    select: { npi: true },
+  });
+  return rows.map((r) => r.npi);
+}
+
+// Pick cohort based on COHORT env var. Default: OBL/ASC active.
+export async function pickCohort(prisma: PrismaClient): Promise<string[]> {
+  if (process.env.COHORT === "all") return getAllIrCohort(prisma);
+  return getOblAscActiveCohort(prisma);
 }
 
 // Sleep helper for rate-limiting.

@@ -22,7 +22,7 @@ import {
   markSourceRunStart,
   markSourceRunSuccess,
   sleep,
-  getOblAscActiveCohort,
+  pickCohort,
 } from "./base";
 
 const SOURCE_KEY = "PUBMED_EUTILS";
@@ -89,7 +89,7 @@ async function searchAuthorPapers(lastName: string, firstName: string): Promise<
 
 export async function runEnricher(npis?: string[]): Promise<void> {
   await markSourceRunStart(prisma, SOURCE_KEY);
-  const cohort = npis ?? (await getOblAscActiveCohort(prisma));
+  const cohort = npis ?? (await pickCohort(prisma));
   console.log(`[${SOURCE_KEY}] Enriching ${cohort.length.toLocaleString()} NPIs (rate ~${Math.round(1000 / RATE_LIMIT_MS)}/s)`);
 
   const physicians = await prisma.physician.findMany({

@@ -24,6 +24,7 @@
     "enrich:pubmed": "tsx scripts/enrichers/pubmed.ts",
     "enrich:clinicaltrials": "tsx scripts/enrichers/clinicaltrials.ts",
     "enrich:practice-website": "tsx scripts/enrichers/practice-website.ts",
+    "enrich:obl-chains": "tsx scripts/enrichers/obl-chains.ts",
     "derive:persona": "tsx scripts/derive-persona.ts",
     "automation:run": "tsx scripts/automation-run.ts"
   },

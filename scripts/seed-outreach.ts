@@ -19,10 +19,12 @@ async function main() {
         isActiveIr: true,
         OR: [{ practiceSetting: "OBL" }, { hasAscAffiliation: true }],
       },
-      "enriched",
+      "prospect",
     );
   } else if (cohort === "all-active") {
-    count = await seedStagesForCohort({ isActiveIr: true }, "enriched");
+    count = await seedStagesForCohort({ isActiveIr: true }, "prospect");
+  } else if (cohort === "all") {
+    count = await seedStagesForCohort({}, "prospect");
   } else {
     console.error(`Unknown cohort: ${cohort}`);
     process.exit(1);

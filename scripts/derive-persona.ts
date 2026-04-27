@@ -45,14 +45,10 @@ interface PhysicianContext {
 }
 
 async function loadContexts(): Promise<PhysicianContext[]> {
-  // Only OBL/ASC active cohort + anyone OIG-excluded (so we mark them DISQUALIFIED).
+  // Every physician we have, so personas exist for every record. The archetype
+  // logic itself decides between OBL/ASC owner, hospital-employed, etc.
   const physicians = await prisma.physician.findMany({
-    where: {
-      OR: [
-        { isActiveIr: true, OR: [{ practiceSetting: "OBL" }, { hasAscAffiliation: true }] },
-        { facts: { some: { fieldPath: "compliance.oig_excluded", supersededById: null } } },
-      ],
-    },
+    where: { deactivationDate: null },
     include: {
       addresses: { where: { kind: "practice" }, take: 1 },
       facts: { where: { supersededById: null } },

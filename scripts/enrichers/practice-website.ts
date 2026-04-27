@@ -19,7 +19,7 @@ import {
   markSourceRunStart,
   markSourceRunSuccess,
   sleep,
-  getOblAscActiveCohort,
+  pickCohort,
 } from "./base";
 
 const SOURCE_WEB = "PRACTICE_WEBSITE_SCRAPE";
@@ -165,7 +165,7 @@ function inferEmailFromPattern(domain: string, firstName: string, lastName: stri
 export async function runEnricher(npis?: string[]): Promise<void> {
   await markSourceRunStart(prisma, SOURCE_WEB);
   await markSourceRunStart(prisma, SOURCE_EMAIL);
-  let cohort = npis ?? (await getOblAscActiveCohort(prisma));
+  let cohort = npis ?? (await pickCohort(prisma));
   const limit = process.env.LIMIT ? parseInt(process.env.LIMIT, 10) : 0;
   if (limit > 0 && cohort.length > limit) {
     console.log(`[${SOURCE_WEB}] Limiting cohort: ${cohort.length} → ${limit} (LIMIT env)`);

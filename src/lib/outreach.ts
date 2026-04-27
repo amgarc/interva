@@ -3,45 +3,34 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 
+// Sales-pipeline stages. Kept short and outcome-oriented.
 export const STAGES = [
-  "untouched",
-  "enriched",
-  "qualified",
-  "queued",
-  "contacted",
-  "engaged",
-  "meeting",
-  "won",
-  "lost",
-  "dnq",
+  "prospect",     // identified, not yet contacted
+  "outreach",     // first touch sent, awaiting reply
+  "discussion",   // replied, in active conversation
+  "committed",    // verbal yes / agreement-in-principle
+  "contracted",   // contract signed / closed-won
+  "no_go",        // not pursuing (lost, declined, or disqualified)
 ] as const;
 
 export type Stage = (typeof STAGES)[number];
 
 export const STAGE_DISPLAY: Record<Stage, string> = {
-  untouched: "Untouched",
-  enriched: "Enriched",
-  qualified: "Qualified",
-  queued: "Queued",
-  contacted: "Contacted",
-  engaged: "Engaged",
-  meeting: "Meeting",
-  won: "Won",
-  lost: "Lost",
-  dnq: "Disqualified",
+  prospect: "Prospect",
+  outreach: "Outreach",
+  discussion: "Discussion",
+  committed: "Committed",
+  contracted: "Contracted",
+  no_go: "No-go",
 };
 
 export const STAGE_COLOR: Record<Stage, string> = {
-  untouched: "bg-slate-200 dark:bg-slate-800",
-  enriched: "bg-blue-200/60 dark:bg-blue-900/40",
-  qualified: "bg-cyan-200/60 dark:bg-cyan-900/40",
-  queued: "bg-violet-200/60 dark:bg-violet-900/40",
-  contacted: "bg-amber-200/60 dark:bg-amber-900/40",
-  engaged: "bg-orange-200/60 dark:bg-orange-900/40",
-  meeting: "bg-purple-200/60 dark:bg-purple-900/40",
-  won: "bg-emerald-200/60 dark:bg-emerald-900/40",
-  lost: "bg-red-200/60 dark:bg-red-900/40",
-  dnq: "bg-stone-200/60 dark:bg-stone-900/40",
+  prospect: "bg-slate-200 dark:bg-slate-800",
+  outreach: "bg-amber-200/60 dark:bg-amber-900/40",
+  discussion: "bg-orange-200/60 dark:bg-orange-900/40",
+  committed: "bg-violet-200/60 dark:bg-violet-900/40",
+  contracted: "bg-emerald-200/60 dark:bg-emerald-900/40",
+  no_go: "bg-stone-200/60 dark:bg-stone-900/40",
 };
 
 export async function listOutreachByStage() {
@@ -111,18 +100,18 @@ export async function logAction(
 // query, defaulting to "enriched" if they have a Persona, else "untouched".
 export async function seedStagesForCohort(
   where: Prisma.PhysicianWhereInput,
-  defaultStage: Stage = "enriched",
+  defaultStage: Stage = "prospect",
 ): Promise<number> {
   const rows = await prisma.physician.findMany({
     where: {
       AND: [where, { outreach: null }],
     },
-    select: { npi: true, persona: { select: { archetype: true } } },
+    select: { npi: true },
   });
   if (rows.length === 0) return 0;
   const data = rows.map((r) => ({
     npi: r.npi,
-    stage: r.persona ? defaultStage : "untouched",
+    stage: defaultStage,
     enteredAt: new Date(),
   }));
   const result = await prisma.outreachStage.createMany({
@@ -130,4 +119,26 @@ export async function seedStagesForCohort(
     skipDuplicates: true,
   });
   return result.count;
+}
+
+// One-time migration: collapse old 10-stage values to new 6-stage values.
+export async function migrateLegacyStages(): Promise<void> {
+  const mapping: Record<string, Stage> = {
+    untouched: "prospect",
+    enriched: "prospect",
+    qualified: "prospect",
+    queued: "outreach",
+    contacted: "outreach",
+    engaged: "discussion",
+    meeting: "discussion",
+    won: "contracted",
+    lost: "no_go",
+    dnq: "no_go",
+  };
+  for (const [oldStage, newStage] of Object.entries(mapping)) {
+    await prisma.outreachStage.updateMany({
+      where: { stage: oldStage },
+      data: { stage: newStage },
+    });
+  }
 }

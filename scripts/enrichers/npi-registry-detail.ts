@@ -13,7 +13,7 @@ import {
   markSourceRunStart,
   markSourceRunSuccess,
   sleep,
-  getOblAscActiveCohort,
+  pickCohort,
 } from "./base";
 
 const SOURCE_KEY = "NPI_REGISTRY_DETAIL";
@@ -62,7 +62,7 @@ interface NpiRegistryResponse {
 
 export async function runEnricher(npis?: string[]): Promise<void> {
   await markSourceRunStart(prisma, SOURCE_KEY);
-  const cohort = npis ?? (await getOblAscActiveCohort(prisma));
+  const cohort = npis ?? (await pickCohort(prisma));
   console.log(`[${SOURCE_KEY}] Enriching ${cohort.length.toLocaleString()} NPIs`);
 
   const facts: Parameters<typeof writeFacts>[2] = [];

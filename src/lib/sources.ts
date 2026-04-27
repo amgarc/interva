@@ -33,6 +33,7 @@ export const SOURCES: SourceSpec[] = [
   { key: "GOOGLE_PLACES",            displayName: "Google Maps Places API",                   category: "verified", baseConfidence: 0.85, freshnessHours: 720, notes: "Requires GOOGLE_PLACES_API_KEY in env. Free tier: 5K req/mo." },
   { key: "VENDOR_CASE_STUDY",        displayName: "Device-vendor physician case studies (BSC, Cook, Penumbra, Medtronic, Sirtex)", category: "scraped", baseConfidence: 0.85, freshnessHours: 8760 },
   { key: "STATE_BUSINESS_FILING",    displayName: "State Secretary of State LLC/PC filings",  category: "scraped", baseConfidence: 0.8, freshnessHours: 8760 },
+  { key: "OBL_CHAIN_ROSTER",         displayName: "Known OBL/ASC chain provider rosters",     category: "scraped", baseConfidence: 0.85, freshnessHours: 720, notes: "Cross-references physician names against published rosters of major OBL/ASC chains (Vive Vascular, IR Centers, etc.). High precision via last+first match." },
 
   // Computed-from-other-facts derivations
   { key: "DERIVED_PERSONA",          displayName: "Interva persona derivation (computed)",    category: "derived", baseConfidence: 0.8, freshnessHours: 168 },
